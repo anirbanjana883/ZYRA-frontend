@@ -129,13 +129,16 @@ function MessageArea() {
       gap-[50px] overflow-auto bg-black"
       >
         {messages &&
-          messages.map((mess, index) =>
-            mess?.sender === userData?._id ? (
-              <SenderMessage key={index} message={mess} />
-            ) : (
-              <ReceiverMessage key={index} message={mess} />
-            )
-          )}
+  messages.map((mess, index) => {
+    const senderId = typeof mess.sender === "object" ? mess.sender._id : mess.sender;
+
+    return senderId === userData?._id ? (
+      <SenderMessage key={index} message={mess} />
+    ) : (
+      <ReceiverMessage key={index} message={mess} />
+    );
+  })}
+
       </div>
 
       {/* form */}

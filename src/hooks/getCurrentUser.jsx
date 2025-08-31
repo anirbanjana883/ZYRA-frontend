@@ -17,9 +17,7 @@ function getCurrentUser() {
         });
 
         dispatch(setUserData(result.data));
-        dispatch(setFollowing(result.data.following));
 
-        // ✅ If user has a story, fetch full story details
         if (result.data.story) {
           const storyRes = await axios.get(
             `${serverUrl}/api/story/getByUserName/${result.data.userName}`,

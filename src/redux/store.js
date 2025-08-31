@@ -4,6 +4,7 @@ import postSlice from "./postSlice";
 import loopSlice from "./loopSlice";  
 import storySlice from "./storySlice";
 import messageSlice from "./messageSlice";
+import socketSlice from "./socketSlice";
 
 const store = configureStore({
   reducer: {
@@ -11,7 +12,8 @@ const store = configureStore({
     post: postSlice,
     loop: loopSlice,
     story: storySlice,
-    message:messageSlice
+    message:messageSlice,
+    socket:socketSlice
   },
 });
 

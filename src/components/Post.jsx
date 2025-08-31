@@ -17,6 +17,7 @@ import { serverUrl } from "../App";
 import { setPostData } from "../redux/postSlice";
 import { setUserData } from "../redux/userSlice";
 import FollowButton from "./FollowButton";
+import { useNavigate } from "react-router-dom";
 
 function Post({ post }) {
   const { userData } = useSelector((state) => state.user);
@@ -24,6 +25,7 @@ function Post({ post }) {
 
   const [showComments, setShowComments] = useState(false);
   const [message, setMessage] = useState("");
+  const navigate = useNavigate()
   const dispatch = useDispatch();
   const savedList = userData?.saved ?? [];
 const isSaved = savedList.some(s =>
@@ -86,7 +88,9 @@ const handleSaved = async () => {
       {/* Top: Profile + Follow button */}
       <div className="w-full flex justify-between items-center">
         <div className="flex items-center gap-4">
-          <div className="w-12 h-12 md:w-14 md:h-14 border-2 border-black rounded-full overflow-hidden">
+          <div className="w-12 h-12 md:w-14 md:h-14 border-2 border-black rounded-full overflow-hidden cursor-pointer"
+            onClick={()=>navigate(`/profile/${post.author.userName}`)}
+          >
             <img
               src={post.author?.profileImage || dp}
               alt="profile"
