@@ -23,6 +23,8 @@ import { useEffect } from 'react';
 import {io} from "socket.io-client"
 import { setOnlineUsers, setSocket } from './redux/socketSlice';
 import getFollowingList from './hooks/getFollowingList';
+import getPrevChatUsers from './hooks/getPrevChatUsers';
+
 
 
 export const serverUrl = "http://localhost:8000";
@@ -35,6 +37,7 @@ function App() {
   const loadingLoop = getAllLoops();
   const loadingStory = getAllStories();
   const loadingFollowing = getFollowingList();
+  const loadingPrevChat = getPrevChatUsers();
   const { userData } = useSelector((state) => state.user);
   const { socket } = useSelector((state) => state.socket);
   
@@ -71,7 +74,7 @@ useEffect(() => {
 }, [userData, dispatch]);
 
 
-  if (loadingCurrent || loadingSuggested || loadingPosts || loadingLoop || loadingStory || loadingFollowing) return null;
+  if (loadingCurrent || loadingSuggested || loadingPosts || loadingLoop || loadingStory || loadingFollowing || loadingPrevChat) return null;
 
   return (
     <Routes>
