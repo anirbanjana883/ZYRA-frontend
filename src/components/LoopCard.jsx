@@ -12,6 +12,7 @@ import axios from "axios";
 import { serverUrl } from "../App";
 import { IoSend } from "react-icons/io5";
 
+
 function LoopCard({ loop }) {
   const videoRef = useRef();
   const [isPlaying, setIsPlaying] = useState(true);
@@ -20,6 +21,7 @@ function LoopCard({ loop }) {
   const navigate = useNavigate();
   const authorId = loop.author?._id || loop.author;
   const { userData } = useSelector((state) => state.user);
+  const { socket } = useSelector((state) => state.socket);
   const { loopData } = useSelector((state) => state.loop);
   const [showHeart, setShowHeart] = useState(false);
   const [showComment, setShowComment] = useState(false);
@@ -137,6 +139,26 @@ function LoopCard({ loop }) {
       observer.disconnect();
     };
   }, []);
+
+
+  // realtime like and update via socket 
+  useEffect(()=>{
+    socket?.on("likedLoop",(updatedData)=>{
+      const updatedLoops = loopData.map(p =>p._id == updatedData.loopId ? {...p,likes:updatedData.likes}:p)
+      dispatch(setLoopData(updatedLoops))
+    })
+  
+    socket?.on("commentedLoop",(updatedData)=>{
+      const updatedLoops = loopData.map(p =>p._id == updatedData.loopId ? {...p,comments:updatedData.comments}:p)
+      dispatch(setLoopData(updatedLoops))
+    })
+  
+    return ()=>{
+      socket?.off("likedLoop")
+      socket?.off("commentedLoop")
+    }
+  },[socket,loopData,dispatch])
+  
 
   return (
     <div className="w-full h-[100vh] flex items-center justify-center relative overflow-hidden">

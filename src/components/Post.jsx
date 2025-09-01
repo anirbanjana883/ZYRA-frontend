@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import dp from "../assets/dp.png";
 import VideoPlayer from "../components/VideoPlayer";
 import axios from "axios";
@@ -22,6 +22,7 @@ import { useNavigate } from "react-router-dom";
 function Post({ post }) {
   const { userData } = useSelector((state) => state.user);
   const { postData } = useSelector((state) => state.post);
+  const { socket } = useSelector((state) => state.socket);
 
   const [showComments, setShowComments] = useState(false);
   const [message, setMessage] = useState("");
@@ -81,6 +82,25 @@ const handleSaved = async () => {
     console.error("Error saving post:", error);
   }
 };
+
+// realtime like and update via socket 
+useEffect(()=>{
+  socket?.on("likedPost",(updatedData)=>{
+    const updatedPosts = postData.map(p =>p._id == updatedData.postId ? {...p,likes:updatedData.likes}:p)
+    dispatch(setPostData(updatedPosts))
+  })
+
+  socket?.on("commentedPost",(updatedData)=>{
+    const updatedPosts = postData.map(p =>p._id == updatedData.postId ? {...p,comments:updatedData.comments}:p)
+    dispatch(setPostData(updatedPosts))
+  })
+
+  return ()=>{
+    socket?.off("likedPost")
+    socket?.off("commentedPost")
+  }
+},[socket,postData,dispatch])
+
 
   return (
     <div className="w-[90%] max-w-[700px] flex flex-col gap-4 bg-white items-center shadow-2xl 
