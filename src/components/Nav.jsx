@@ -18,7 +18,7 @@ function Nav() {
       onClick={() => navigate("/")}
       ><TbHomeFilled /></div>
       {/* search */}
-      <div className="text-white text-[22px] cursor-pointer hover:text-gray-300 transition"><FaSearch /></div>
+      <div className="text-white text-[22px] cursor-pointer hover:text-gray-300 transition" onClick={()=>navigate("/search")}><FaSearch /></div>
       {/* upload */}
       <div className="text-white text-[22px] cursor-pointer hover:text-gray-300 transition" onClick={()=>navigate("/upload")}><FaRegSquarePlus /></div>
       {/* reels */}
