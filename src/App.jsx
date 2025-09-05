@@ -25,6 +25,8 @@ import { setOnlineUsers, setSocket } from './redux/socketSlice';
 import getFollowingList from './hooks/getFollowingList';
 import getPrevChatUsers from './hooks/getPrevChatUsers';
 import Search from './pages/Search';
+import getAllNotifications from './hooks/getAllNotification';
+import Notifications from './pages/Notifications';
 
 
 
@@ -39,6 +41,7 @@ function App() {
   const loadingStory = getAllStories();
   const loadingFollowing = getFollowingList();
   const loadingPrevChat = getPrevChatUsers();
+   getAllNotifications()
   const { userData } = useSelector((state) => state.user);
   const { socket } = useSelector((state) => state.socket);
   
@@ -75,7 +78,7 @@ useEffect(() => {
 }, [userData, dispatch]);
 
 
-  if (loadingCurrent || loadingSuggested || loadingPosts || loadingLoop || loadingStory || loadingFollowing || loadingPrevChat) return null;
+  if (loadingCurrent || loadingSuggested || loadingPosts || loadingLoop || loadingStory || loadingFollowing || loadingPrevChat ) return null;
 
   return (
     <Routes>
@@ -90,6 +93,7 @@ useEffect(() => {
       <Route path="/messages" element={userData ? <Messages/> : <Navigate to="/signin" />} />
       <Route path="/story/:userName" element={userData ? <Story/> : <Navigate to="/signin" />} />
       <Route path="/messageArea" element={userData ? <MessageArea/> : <Navigate to="/signin" />} />
+      <Route path="/notifications" element={userData ? <Notifications/> : <Navigate to="/signin" />} />
       <Route path="/search" element={userData ? <Search/> : <Navigate to="/signin" />} />
       
     </Routes>

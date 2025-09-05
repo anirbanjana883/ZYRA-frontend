@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import logo from "../assets/ZYRA_logo.png";
 import { FaRegHeart } from "react-icons/fa";
 import dp from "../assets/dp.png";
@@ -10,6 +10,8 @@ import OtherUser from "./OtherUser";
 
 function LeftHome() {
   const { userData, suggestedUser } = useSelector((state) => state.user); 
+  const {notificationData} = useSelector(state=>state.user)
+  const[showNotificaton , setShowNotification] = useState(false)
   const dispatch = useDispatch();
 
   const handleLogOut = async () => {
@@ -27,7 +29,18 @@ function LeftHome() {
       {/* Logo and notification */}
       <div className="w-full h-[100px] flex items-center justify-between px-[20px]">
         <img src={logo} alt="ZYRA logo" className="w-[50px]" />
-        <FaRegHeart className="text-white w-[25px] h-[25px]" />
+        <div className="relative">
+          <FaRegHeart className="text-white w-[25px] h-[25px]" />
+
+          {(notificationData?.length > 0 &&
+          notificationData.some((noti)=>noti.isRead === false))
+          && 
+          <div className="w-[10px] h-[10px] bg-red-600 rounded-full absolute top-0 right-[-5px]"></div>
+
+          }
+
+        </div>
+        
       </div>
 
       {/* Profile & logout */}

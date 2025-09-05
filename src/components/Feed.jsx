@@ -11,6 +11,7 @@ import { useNavigate } from "react-router-dom";
 function Feed() {
   const { postData } = useSelector((state) => state.post);
   const { userData } = useSelector((state) => state.user);
+  const {notificationData} = useSelector(state=>state.user)
   const navigate = useNavigate();
   const { storyList, currentUserStory } = useSelector((state) => state.story);
 
@@ -23,13 +24,20 @@ function Feed() {
 
         {/* Right: Icons */}
         <div className="flex items-center gap-6">
+          <div className="relative"
+          onClick={()=>navigate("/notifications")}>
+            <FaRegHeart className="text-white w-[25px] h-[25px]" />
 
-          <FaRegHeart className="text-white w-[25px] h-[25px]" />
+            {notificationData?.length > 0 &&
+              notificationData.some((noti) => noti.isRead === false) && (
+                <div className="w-[10px] h-[10px] bg-red-600 rounded-full absolute top-0 right-[-5px]"></div>
+              )}
+          </div>
+
           <TbMessage2
             className="text-white w-[27px] h-[27px]"
             onClick={() => navigate("/messages")}
           />
-
         </div>
       </div>
 
