@@ -3,9 +3,9 @@ import { createSlice } from "@reduxjs/toolkit";
 const storySlice = createSlice({
   name: "story",
   initialState: {
-    storyData:[],
-    storyList:[],
-    currentUserStory:null
+    storyData: [],       
+    storyList: [],       
+    currentUserStory: null, 
   },
   reducers: {
     setStoryData: (state, action) => {
@@ -17,8 +17,25 @@ const storySlice = createSlice({
     setCurrentUserStory: (state, action) => {
       state.currentUserStory = action.payload;
     },
+    setDeleteStory: (state, action) => {
+      // Remove the deleted story from storyList
+      state.storyList = state.storyList.filter(
+        (story) => story._id !== action.payload
+      );
+
+      // If current user's story is deleted, clear it
+      if (state.currentUserStory?._id === action.payload) {
+        state.currentUserStory = null;
+      }
+    },
   },
 });
 
-export const { setStoryData , setStoryList , setCurrentUserStory} = storySlice.actions;
+export const { 
+  setStoryData, 
+  setStoryList, 
+  setCurrentUserStory,
+  setDeleteStory   
+} = storySlice.actions;
+
 export default storySlice.reducer;

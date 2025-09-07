@@ -14,6 +14,7 @@ import { setLoopData } from "../redux/loopSlice";
 import axios from "axios";
 import { serverUrl } from "../App";
 import { BiSend } from "react-icons/bi";
+import { BsThreeDotsVertical } from "react-icons/bs";
 
 function LoopCard({ loop }) {
   const videoRef = useRef();
@@ -28,6 +29,7 @@ function LoopCard({ loop }) {
   const [message, setMessage] = useState("");
   const [replyInputId, setReplyInputId] = useState(null); // ADDED: Track which comment reply input is open
   const [replyMessage, setReplyMessage] = useState(""); // ADDED: Reply text
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
 
   const navigate = useNavigate();
   const dispatch = useDispatch();
@@ -175,6 +177,26 @@ function LoopCard({ loop }) {
       dispatch(setLoopData(updatedLoops));
     } catch (err) {
       console.error("Error deleting reply:", err);
+    }
+  };
+
+  // ====================== DELETE LOOP ======================
+  const handleDeleteLoop = async () => {
+    try {
+      const res = await axios.delete(
+        `${serverUrl}/api/loop/delete/${loop._id}`,
+        {
+          withCredentials: true,
+        }
+      );
+
+      if (res.status === 200) {
+        const updatedLoops = loopData.filter((p) => p._id !== loop._id);
+        dispatch(setLoopData(updatedLoops));
+        setShowDeleteModal(false); // close modal after delete
+      }
+    } catch (err) {
+      console.error("Error deleting loop:", err);
     }
   };
 
@@ -364,7 +386,6 @@ function LoopCard({ loop }) {
                     >
                       <BiSend size={16} />
                     </button>
-
                   </div>
                 )}
 
@@ -472,6 +493,18 @@ function LoopCard({ loop }) {
                 tailwind="px-[10px] py-[5px] text-white border-2 text-[14px] rounded-2xl border-white cursor-pointer relative z-[50]"
               />
             )}
+
+          {/* Loop Owner Options (3-dot Menu) */}
+          {String(userData._id) === String(authorId) && (
+            <div className="relative">
+              <button
+                className="text-white text-2xl px-2 cursor-pointer"
+                onClick={() => setShowDeleteModal(true)}
+              >
+                <BsThreeDotsVertical />
+              </button>
+            </div>
+          )}
         </div>
 
         <div className="text-white px-[10px]">{loop.caption}</div>
@@ -502,6 +535,39 @@ function LoopCard({ loop }) {
           </div>
         </div>
       </div>
+
+      {/* Delete confirmation modal */}
+
+      {showDeleteModal && (
+        <div
+          className="fixed inset-0 flex items-center justify-center bg-transparent z-[999]"
+          onClick={(e) => {
+            // Close only if clicked outside the modal box
+            if (e.target === e.currentTarget) {
+              setShowDeleteModal(false);
+            }
+          }}
+        >
+          <div className="bg-white p-6 rounded-lg shadow-lg w-[300px] text-center">
+            <p className="mb-4 font-semibold">Delete this loop?</p>
+            <div className="flex justify-around">
+              <button
+                onClick={() => setShowDeleteModal(false)}
+                className="px-4 py-1 rounded bg-gray-200 hover:bg-gray-300 cursor-pointer"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleDeleteLoop}
+                className="px-4 py-1 rounded bg-red-500 text-white hover:bg-red-600 cursor-pointer"
+              >
+                Delete
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
     </div>
   );
 }

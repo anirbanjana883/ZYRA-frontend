@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useRef } from "react";
 import dp from "../assets/dp.png";
 import VideoPlayer from "../components/VideoPlayer";
 import axios from "axios";
@@ -13,6 +13,7 @@ import { setUserData } from "../redux/userSlice";
 import FollowButton from "./FollowButton";
 import { useNavigate } from "react-router-dom";
 import { BiSend } from "react-icons/bi";
+import { HiOutlineDotsHorizontal } from "react-icons/hi";
 
 function Post({ post }) {
   const { userData } = useSelector((state) => state.user);
@@ -21,19 +22,35 @@ function Post({ post }) {
 
   const [showComments, setShowComments] = useState(false);
   const [message, setMessage] = useState("");
-
-  // ⭐ NEW – reply states
   const [replyingTo, setReplyingTo] = useState(null);
   const [replyMessage, setReplyMessage] = useState("");
 
+  const [showOptions, setShowOptions] = useState(false);
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+
+  const menuRef = useRef(null);
   const navigate = useNavigate();
   const dispatch = useDispatch();
+
   const savedList = userData?.saved ?? [];
   const isSaved = savedList.some((s) =>
     typeof s === "string" || typeof s === "number"
       ? String(s) === String(post._id)
       : s?._id === post._id
   );
+
+  // Close menu when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (e) => {
+      if (menuRef.current && !menuRef.current.contains(e.target)) {
+        setShowOptions(false);
+      }
+    };
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, []);
 
   // Like Post
   const handleLike = async () => {
@@ -43,7 +60,7 @@ function Post({ post }) {
       });
       const updatedPost = result.data;
       const updatedPosts = postData.map((p) =>
-        p._id == post._id ? updatedPost : p
+        p._id === post._id ? updatedPost : p
       );
       dispatch(setPostData(updatedPosts));
     } catch (error) {
@@ -61,7 +78,7 @@ function Post({ post }) {
       );
       const updatedPost = result.data;
       const updatedPosts = postData.map((p) =>
-        p._id == post._id ? updatedPost : p
+        p._id === post._id ? updatedPost : p
       );
       dispatch(setPostData(updatedPosts));
       setMessage("");
@@ -70,7 +87,7 @@ function Post({ post }) {
     }
   };
 
-  // ⭐ NEW – Reply to Comment
+  // Reply to Comment
   const handleReply = async (commentId) => {
     if (!replyMessage.trim()) return;
     try {
@@ -88,23 +105,14 @@ function Post({ post }) {
     }
   };
 
-  // ⭐ NEW – Delete Comment
-  // ⭐ UPDATED – handle delete comment
+  // Delete Comment
   const handleDeleteComment = async (commentId) => {
     try {
       const { data } = await axios.delete(
         `${serverUrl}/api/post/comment/${post._id}/${commentId}`,
         { withCredentials: true }
       );
-
-      if (!data || !data._id) {
-        console.warn(
-          "Delete comment: server did not return full post, falling back..."
-        );
-        return;
-      }
-
-      // ✅ Update only the deleted comment inside current post
+      if (!data || !data._id) return;
       const updatedPosts = postData.map((p) => (p._id === post._id ? data : p));
       dispatch(setPostData(updatedPosts));
     } catch (err) {
@@ -112,7 +120,7 @@ function Post({ post }) {
     }
   };
 
-  // ⭐ NEW – Delete Reply
+  // Delete Reply
   const handleDeleteReply = async (commentId, replyId) => {
     try {
       const { data } = await axios.delete(
@@ -123,6 +131,20 @@ function Post({ post }) {
       dispatch(setPostData(updatedPosts));
     } catch (err) {
       console.error("Error deleting reply:", err);
+    }
+  };
+
+  // Delete Post
+  const handleDeletePost = async () => {
+    try {
+      await axios.delete(`${serverUrl}/api/post/delete/${post._id}`, {
+        withCredentials: true,
+      });
+      const updatedPosts = postData.filter((p) => p._id !== post._id);
+      dispatch(setPostData(updatedPosts));
+      setShowDeleteConfirm(false);
+    } catch (err) {
+      console.error("Error deleting post:", err);
     }
   };
 
@@ -139,37 +161,40 @@ function Post({ post }) {
     }
   };
 
-  // Realtime updates
+  // Real-time socket listeners
   useEffect(() => {
     socket?.on("likedPost", (updatedData) => {
       const updatedPosts = postData.map((p) =>
-        p._id == updatedData.postId ? { ...p, likes: updatedData.likes } : p
+        p._id === updatedData.postId ? { ...p, likes: updatedData.likes } : p
       );
       dispatch(setPostData(updatedPosts));
     });
 
     socket?.on("commentedPost", (updatedData) => {
       const updatedPosts = postData.map((p) =>
-        p._id == updatedData.postId
+        p._id === updatedData.postId
           ? { ...p, comments: updatedData.comments }
           : p
       );
       dispatch(setPostData(updatedPosts));
     });
 
+    socket?.on("deletedPost", ({ postId }) => {
+      const updatedPosts = postData.filter((p) => p._id !== postId);
+      dispatch(setPostData(updatedPosts));
+    });
+
     return () => {
       socket?.off("likedPost");
       socket?.off("commentedPost");
+      socket?.off("deletedPost");
     };
   }, [socket, postData, dispatch]);
 
   return (
-    <div
-      className="w-[90%] max-w-[700px] flex flex-col gap-4 bg-white items-center shadow-2xl 
-    shadow-[#00000058] rounded-2xl p-5"
-    >
-      {/* Top: Profile + Follow button */}
-      <div className="w-full flex justify-between items-center">
+    <div className="w-[90%] max-w-[700px] flex flex-col gap-4 bg-white items-center shadow-2xl shadow-[#00000058] rounded-2xl p-5 relative">
+      {/* Top: Profile + Follow + Options */}
+      <div className="w-full flex justify-between items-center relative">
         <div className="flex items-center gap-4">
           <div
             className="w-12 h-12 md:w-14 md:h-14 border-2 border-black rounded-full overflow-hidden cursor-pointer"
@@ -186,13 +211,42 @@ function Post({ post }) {
           </div>
         </div>
 
-        {/* follow button */}
-        {userData?._id !== post.author?._id && post.author && (
-          <FollowButton
-            tailwind="px-4 py-1 bg-black text-white rounded-2xl text-sm md:text-base cursor-pointer"
-            targetUserId={post.author._id}
-          />
-        )}
+        <div className="flex items-center gap-2" ref={menuRef}>
+          {userData?._id !== post.author?._id && post.author && (
+            <FollowButton
+              tailwind="px-4 py-1 bg-black text-white rounded-2xl text-sm md:text-base cursor-pointer"
+              targetUserId={post.author?._id}
+            />
+          )}
+
+          {/* Post Options Menu */}
+          <button
+            onClick={() => setShowOptions((prev) => !prev)}
+            className="p-2 rounded-full hover:bg-gray-200 transition cursor-pointer"
+          >
+            <HiOutlineDotsHorizontal size={22} />
+          </button>
+
+          {showOptions && (
+            <div className="absolute right-0 top-10 w-40 bg-gray-600 shadow-lg rounded-lg z-20">
+              {post.author?._id === userData?._id ? (
+                <button
+                  onClick={() => setShowDeleteConfirm(true)}
+                  className="w-full px-4 py-2 text-left text-white hover:bg-gray-100 hover:text-gray-800 rounded-t-lg cursor-pointer"
+                >
+                  Delete Post
+                </button>
+              ) : (
+                <button
+                  onClick={() => console.log("Report post")}
+                  className="w-full px-4 py-2 text-left text-white hover:bg-gray-100 hover:text-gray-800 rounded-t-lg cursor-pointer"
+                >
+                  Report Post
+                </button>
+              )}
+            </div>
+          )}
+        </div>
       </div>
 
       {/* Post content */}
@@ -204,7 +258,6 @@ function Post({ post }) {
             className="max-w-full max-h-[500px] object-contain rounded-xl"
           />
         )}
-
         {post.mediaType === "video" && (
           <div className="w-full max-w-[600px]">
             <VideoPlayer media={post.media} />
@@ -218,13 +271,12 @@ function Post({ post }) {
         <div className="flex justify-center items-center gap-[10px]">
           {/* like */}
           <div className="flex justify-center items-center gap-[5px]">
-            {!post.likes?.includes(userData._id) && (
+            {!post.likes?.includes(userData?._id) ? (
               <GoHeart
                 onClick={handleLike}
                 className="w-[25px] cursor-pointer h-[25px]"
               />
-            )}
-            {post.likes?.includes(userData._id) && (
+            ) : (
               <GoHeartFill
                 onClick={handleLike}
                 className="w-[25px] cursor-pointer h-[25px] text-red-600"
@@ -245,10 +297,9 @@ function Post({ post }) {
 
         {/* saved post */}
         <div onClick={handleSaved}>
-          {!isSaved && (
+          {!isSaved ? (
             <BsBookmarks className="w-[25px] cursor-pointer h-[25px]" />
-          )}
-          {isSaved && (
+          ) : (
             <BsBookmarksFill className="w-[25px] cursor-pointer h-[25px]" />
           )}
         </div>
@@ -262,10 +313,10 @@ function Post({ post }) {
         </div>
       )}
 
-      {/* commenting system */}
+      {/* comments */}
       {showComments && (
         <div className="w-full flex flex-col gap-[30px] pb-[20px]">
-          {/* main comment input */}
+          {/* input */}
           <div className="w-full h-[80px] flex items-center justify-between px-[20px] relative">
             <div className="w-10 h-10 md:w-12 md:h-12 border-2 border-black rounded-full overflow-hidden">
               <img
@@ -292,7 +343,7 @@ function Post({ post }) {
             )}
           </div>
 
-          {/* comments list */}
+          {/* list */}
           <div className="w-full max-h-[300px] overflow-auto">
             {post.comments?.map((com) => (
               <div
@@ -302,7 +353,7 @@ function Post({ post }) {
                 <div className="flex items-center gap-[10px]">
                   <div className="w-10 h-10 md:w-12 md:h-12 border-2 border-black rounded-full overflow-hidden">
                     <img
-                      src={com.author?.profileImage || dp}
+                      src={com?.author?.profileImage || dp}
                       alt="profile"
                       className="w-full h-full object-cover"
                     />
@@ -313,7 +364,6 @@ function Post({ post }) {
                   </div>
                 </div>
 
-                {/* ⭐ UPDATED – Comment actions */}
                 <div className="ml-12 flex gap-3 text-sm text-gray-500 mt-1">
                   <button
                     className="hover:underline cursor-pointer"
@@ -333,7 +383,7 @@ function Post({ post }) {
                   )}
                 </div>
 
-                {/* ⭐ UPDATED – Replies */}
+                {/* replies */}
                 {com.replies?.map((rep) => (
                   <div
                     key={rep._id}
@@ -357,7 +407,6 @@ function Post({ post }) {
                   </div>
                 ))}
 
-                {/* ⭐ UPDATED – Reply input */}
                 {replyingTo === com._id && (
                   <div className="ml-12 mt-2 flex gap-2">
                     <input
@@ -367,25 +416,39 @@ function Post({ post }) {
                       placeholder="Write a reply..."
                       className="border rounded px-2 py-1 text-sm flex-1"
                     />
-                    {/* <button
-                      onClick={() => handleReply(com._id)}
-                      className="bg-blue-500 text-white px-2 rounded"
-                    >
-                      Send
-                    </button> */}
-
-                    {/* send button */}
                     <button
                       onClick={() => handleReply(com._id)}
                       className="bg-blue-500 text-white p-1 rounded-md hover:bg-blue-600 transition flex items-center justify-center cursor-pointer"
                     >
                       <BiSend size={16} />
                     </button>
-
                   </div>
                 )}
               </div>
             ))}
+          </div>
+        </div>
+      )}
+
+      {/* Delete confirmation modal */}
+      {showDeleteConfirm && (
+        <div className="fixed inset-0 flex items-center justify-center bg-black/70 z-50">
+          <div className="bg-gray-900 p-6 rounded-2xl shadow-lg w-[300px] text-center">
+            <p className="mb-4 font-semibold text-white">Delete this post?</p>
+            <div className="flex justify-around">
+              <button
+                onClick={() => setShowDeleteConfirm(false)}
+                className="px-4 py-1 rounded bg-gray-700 text-white hover:bg-gray-600 cursor-pointer"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleDeletePost}
+                className="px-4 py-1 rounded bg-red-600 text-white hover:bg-red-700 cursor-pointer"
+              >
+                Delete
+              </button>
+            </div>
           </div>
         </div>
       )}
