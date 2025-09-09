@@ -9,8 +9,11 @@ import { MdAttachment } from "react-icons/md";
 import { IoSend } from "react-icons/io5";
 import SenderMessage from "../components/SenderMessage";
 import ReceiverMessage from "../components/ReceiverMessage";
-import { setMessages } from "../redux/messageSlice.js";
-import {setSelectedUser } from "../redux/messageSlice.js";
+import { setMessages, setSelectedUser } from "../redux/messageSlice.js";
+import relativeTime from "dayjs/plugin/relativeTime";
+import dayjs from "dayjs";
+
+dayjs.extend(relativeTime);
 
 function MessageArea() {
   const { selectedUser, messages } = useSelector((state) => state.message);
@@ -21,19 +24,41 @@ function MessageArea() {
   const imageInput = useRef();
   const [frontendImage, setFrontendImage] = useState(null);
   const [backendImage, setBackendImage] = useState(null);
+  const [isOnline, setIsOnline] = useState(false);
+  const [lastSeen, setLastSeen] = useState(null);
   const dispatch = useDispatch();
 
+  const getDateLabel = (date) => {
+    const msgDate = dayjs(date);
+    const today = dayjs();
+    const yesterday = dayjs().subtract(1, "day");
+
+    if (msgDate.isSame(today, "day")) return "Today";
+    if (msgDate.isSame(yesterday, "day")) return "Yesterday";
+    return msgDate.format("MMM D, YYYY");
+  };
+
+  const getLastSeenLabel = (user) => {
+    if (user?.isOnline) return "Online";
+    if (user?.lastSeen) return `Last seen ${dayjs(user.lastSeen).fromNow()}`;
+    return "";
+  };
+
+  const formatLastSeen = (date) => {
+    if (!date) return "";
+    return `Last seen ${dayjs(date).format("MMM D, YYYY h:mm A")}`;
+  };
+
   const handleImage = (e) => {
-    {
-      const file = e.target.files[0];
-      setBackendImage(file);
-      setFrontendImage(URL.createObjectURL(file));
-    }
+    const file = e.target.files[0];
+    setBackendImage(file);
+    setFrontendImage(URL.createObjectURL(file));
   };
 
   const handleSendMessage = async (e) => {
     e.preventDefault();
     if (!selectedUser?._id) return;
+
     try {
       const formData = new FormData();
       formData.append("message", input);
@@ -48,7 +73,7 @@ function MessageArea() {
         }
       );
 
-      dispatch(setMessages([...(messages || []), result.data]));
+      dispatch(setMessages([...messages, result.data]));
       setInput("");
       setFrontendImage(null);
       setBackendImage(null);
@@ -64,13 +89,12 @@ function MessageArea() {
         { withCredentials: true }
       );
       dispatch(setMessages(result.data.messages || []));
-
     } catch (error) {
       console.log(error);
     }
   };
 
-   useEffect(() => {
+  useEffect(() => {
     const savedUser = localStorage.getItem("selectedUser");
     if (savedUser) {
       dispatch(setSelectedUser(JSON.parse(savedUser)));
@@ -78,24 +102,49 @@ function MessageArea() {
   }, [dispatch]);
 
   useEffect(() => {
-  if (selectedUser?._id) {
-    getAllMessages();
-  }
-}, [selectedUser]);
+    if (selectedUser?._id) {
+      getAllMessages();
+    }
+  }, [selectedUser]);
 
+  //  Real-time socket listener
+  useEffect(() => {
+    if (!selectedUser?._id) return;
 
-useEffect(()=>{
-  socket?.on("newMessage",(mess)=>{
-    dispatch(setMessages([...messages,mess]))
-  })
-  return ()=>socket?.off("newMessage")
-},[messages,setMessages])
+    const handleNewMessage = (mess) => {
+      dispatch(setMessages((prev) => [...prev, mess]));
+    };
+
+    const handleOnlineUsers = (onlineUserIds) => {
+      const online = onlineUserIds.includes(selectedUser._id);
+      setIsOnline(online);
+
+      if (!online) {
+        axios
+          .get(`${serverUrl}/api/user/lastSeen/${selectedUser._id}`, {
+            withCredentials: true,
+          })
+          .then((res) => setLastSeen(res.data.lastSeen))
+          .catch((err) => console.log(err));
+      }
+    };
+
+    socket?.on("newMessage", handleNewMessage);
+    socket?.on("getOnlineUsers", handleOnlineUsers);
+
+    // request initial online users
+    socket?.emit("requestOnlineUsers");
+
+    return () => {
+      socket?.off("newMessage", handleNewMessage);
+      socket?.off("getOnlineUsers", handleOnlineUsers);
+    };
+  }, [socket, dispatch, selectedUser]);
 
   return (
     <div className="w-full h-[100vh] bg-black relative">
       {/* profile image , back icon  */}
       <div className="flex items-center gap-[15px] px-[20px] py-[10px] top-0 z-[100] bg-black w-full">
-        {/* back icon */}
         <div className=" h-[80px]  flex items-center gap-[20px] px-[20px]">
           <IoArrowBack
             size={30}
@@ -104,7 +153,7 @@ useEffect(()=>{
           />
         </div>
 
-        {/* pprofile image  */}
+        {/* profile image */}
         <div>
           <div
             className="w-[40px] h-[40px] border-2 border-black rounded-full cursor-pointer overflow-hidden"
@@ -120,33 +169,58 @@ useEffect(()=>{
           </div>
         </div>
 
-        {/* name and user name  */}
-
-        <div
-          className="text-white text-[18px] font-semibold 
-        "
-        >
+        {/* name and username + online status */}
+        <div className="text-white text-[18px] font-semibold flex flex-col">
           <div>{selectedUser?.userName}</div>
-          <div className="text-[14px] text-gray-300">{selectedUser?.name}</div>
+          <div className="text-[14px]">
+            {isOnline ? (
+              <span className="text-green-500">Online</span> // green for online
+            ) : lastSeen ? (
+              <span className="text-gray-400">{formatLastSeen(lastSeen)}</span> // gray for offline
+            ) : (
+              <span className="text-gray-400">Offline</span> // optional fallback
+            )}
+          </div>
         </div>
       </div>
 
-      {/* message */}
-      <div
-        className="w-full h-[80%] pt-[100px] pb-[120px] lg:pb-[150px] px-[40px] flex flex-col
-      gap-[50px] overflow-auto bg-black"
-      >
+      {/* messages with Today/Yesterday/Date grouping */}
+      <div className="w-full h-[80%] pt-[100px] pb-[120px] lg:pb-[150px] px-[40px] flex flex-col gap-[20px] overflow-auto bg-black">
         {messages &&
-  messages.map((mess, index) => {
-    const senderId = typeof mess.sender === "object" ? mess.sender._id : mess.sender;
+          messages.map((mess, index) => {
+            const senderId =
+              typeof mess.sender === "object" ? mess.sender._id : mess.sender;
+            const isOwnMessage = senderId === userData?._id;
 
-    return senderId === userData?._id ? (
-      <SenderMessage key={index} message={mess} />
-    ) : (
-      <ReceiverMessage key={index} message={mess} />
-    );
-  })}
+            //  Determine if a date header should show
+            const showDateHeader =
+              index === 0 ||
+              !dayjs(mess.createdAt).isSame(
+                messages[index - 1].createdAt,
+                "day"
+              );
 
+            let dateLabel = "";
+            if (showDateHeader) {
+              dateLabel = getDateLabel(mess.createdAt); // ✅ changed
+            }
+
+            return (
+              <React.Fragment key={mess._id || index}>
+                {showDateHeader && (
+                  <div className="text-center text-gray-400 text-sm my-2">
+                    {dateLabel} {/* ✅ changed */}
+                  </div>
+                )}
+
+                {isOwnMessage ? (
+                  <SenderMessage message={mess} />
+                ) : (
+                  <ReceiverMessage message={mess} />
+                )}
+              </React.Fragment>
+            );
+          })}
       </div>
 
       {/* form */}
@@ -177,7 +251,6 @@ useEffect(()=>{
             onChange={(e) => setInput(e.target.value)}
             value={input}
           />
-          {/* icon */}
 
           <div onClick={() => imageInput.current.click()}>
             <MdAttachment className="w-[28px] h-[28px] text-white cursor-pointer" />

@@ -16,10 +16,18 @@ function Messages() {
 
   const [search, setSearch] = useState("");
 
+  // -----------------------------
   // filter chats by search
-  const filteredChats = (prevChatUsers || []).filter((user) =>
-    user.userName?.toLowerCase().includes(search.toLowerCase())
-  );
+  // -----------------------------
+  const filteredChats = (prevChatUsers || [])
+    .filter((user) =>
+      user.userName?.toLowerCase().includes(search.toLowerCase())
+    )
+    .sort(
+      // ✅ sort by last message time descending
+      (a, b) =>
+        new Date(b.lastMessageTime || 0) - new Date(a.lastMessageTime || 0)
+    );
 
   return (
     <div className="w-full min-h-[100vh] flex flex-col bg-black gap-[20px] p-[20px]">
@@ -51,7 +59,7 @@ function Messages() {
         {userData.following?.map(
           (user, index) =>
             onlineUsers?.includes(user._id) && (
-              <OnlineUser key={index} user={user} />
+              <OnlineUser key={user._id || index} user={user} />
             )
         )}
       </div>
@@ -98,13 +106,23 @@ function Messages() {
                   <div className="text-green-500 text-[13px]">Active now</div>
                 ) : (
                   <div className="text-gray-500 text-[13px]">
-                    Last seen recently
+                    Last seen:{" "}
+                    {user.lastSeen
+                      ? new Date(user.lastSeen).toLocaleString()
+                      : "recently"}
                   </div>
                 )}
               </div>
 
-              {/* fake timestamp (replace with last msg time later) */}
-              <div className="text-gray-500 text-[12px]">2h</div>
+              {/* last message time */}
+              <div className="text-gray-500 text-[12px]">
+                {user.lastMessageTime
+                  ? new Date(user.lastMessageTime).toLocaleTimeString([], {
+                      hour: "2-digit",
+                      minute: "2-digit",
+                    })
+                  : ""}
+              </div>
             </div>
           ))
         )}

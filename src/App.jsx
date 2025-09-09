@@ -27,6 +27,8 @@ import getPrevChatUsers from './hooks/getPrevChatUsers';
 import Search from './pages/Search';
 import getAllNotifications from './hooks/getAllNotification';
 import Notifications from './pages/Notifications';
+import { addMessage, updateMessageStatus, updatePrevChatUser } from './redux/messageSlice';
+import { initSocket, getSocket, closeSocket } from "./socket";
 
 
 
@@ -45,37 +47,53 @@ function App() {
   const { userData } = useSelector((state) => state.user);
   const { socket } = useSelector((state) => state.socket);
   
-useEffect(() => {
-  if (userData) {
-    const socketIo = io(serverUrl, {
-      query: { 
-        userId: userData._id 
-      }
-    });
+  useEffect(() => {
+    if (userData) {
+      // ✅ use centralized initSocket
+      const socketIo = initSocket(userData._id);
 
-    socketIo.on("connect", () => {
-      console.log("Socket connected:", socketIo.id);
-    });
+      dispatch(setSocket(socketIo));
 
-    socketIo.on("disconnect", () => {
-      console.log("Socket disconnected");
-    });
+      // online users
+      socketIo.on("getOnlineUsers", (users) => {
+        dispatch(setOnlineUsers(users));
+      });
 
-    dispatch(setSocket(socketIo));
+      // ------------------------------
+      // Real-time messaging listeners
+      // ------------------------------
 
-    // will get user id of all the current user 
-    socketIo.on('getOnlineUsers',(users)=>{
-      dispatch(setOnlineUsers(users))
-    })
+      socketIo.on("receiveMessage", (message) => {
+        dispatch(addMessage(message));
+        dispatch(updatePrevChatUser({
+          userId: message.sender,
+          lastMessage: message.message,
+          lastMessageTime: message.createdAt,
+        }));
+      });
 
-    return () => socketIo.close();
-  } else {
-    if (socket) {
-      socket.close();
+      socketIo.on("messageStatusUpdate", ({ messageId, status }) => {
+        dispatch(updateMessageStatus({ messageId, status }));
+      });
+
+      socketIo.on("messagesSeen", ({ by }) => {
+        dispatch(updatePrevChatUser({
+          userId: by,
+          lastMessageTime: new Date().toISOString(),
+        }));
+      });
+
+      // ✅ cleanup
+      return () => {
+        closeSocket();
+        dispatch(setSocket(null));
+      };
+
+    } else if (socket) {
+      closeSocket();
       dispatch(setSocket(null));
     }
-  }
-}, [userData, dispatch]);
+  }, [userData, dispatch]);
 
 
   if (loadingCurrent || loadingSuggested || loadingPosts || loadingLoop || loadingStory || loadingFollowing || loadingPrevChat ) return null;

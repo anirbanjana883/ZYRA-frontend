@@ -1,5 +1,6 @@
 import React, { useEffect, useRef } from 'react'
 import { useSelector } from 'react-redux'
+import dayjs from "dayjs";
 
 function SenderMessage({ message }) {
   const { userData } = useSelector((state) => state.user)
@@ -28,6 +29,11 @@ function SenderMessage({ message }) {
           {message.message}
         </div>
       )}
+      
+      {/*  timestamp */}
+      <div className="text-[11px] text-gray-200 ml-auto">
+        {dayjs(message?.createdAt).format("h:mm A")}
+      </div>
       
       {/* sender image */}
       <div className='w-[30px] h-[30px] rounded-full cursor-pointer overflow-hidden absolute right-[-25px] bottom-[-35px] ring-2 ring-white/30'>
