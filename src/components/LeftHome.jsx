@@ -12,7 +12,7 @@ import Notifications from "../pages/Notifications";
 
 function LeftHome() {
   const { userData, notificationData } = useSelector((state) => state.user);
-  
+
   const dispatch = useDispatch();
   const navigate = useNavigate();
 
@@ -32,13 +32,18 @@ function LeftHome() {
       {/* Logo and notification button */}
       <div className="w-full h-[100px] flex items-center justify-between px-[20px] shrink-0">
         <img src={logo} alt="ZYRA logo" className="w-[50px]" />
-        <img src={tagLine} alt="ZYRA logo" className="w-[50px]" />
+        {/* Tagline */}
+        <div className="flex-1 flex justify-center items-center px-4">
+          <img
+            src={tagLine}
+            alt="Tagline"
+            className="max-w-[180px] h-auto object-contain"
+          />
+        </div>
         <div
           className="relative cursor-pointer lg:hidden"
           onClick={() => navigate("/notifications")}
-        >
-        
-        </div>
+        ></div>
       </div>
 
       {/* Profile & logout */}
@@ -72,15 +77,13 @@ function LeftHome() {
         </div>
       </div>
 
-       {/* Notifications section header */}
+      {/* Notifications section header */}
       <div className="w-full px-30 py-3 border-b border-gray-900 items-centercenter">
         <h2 className="text-white text-lg font-semibold">Notifications</h2>
       </div>
-      
 
       {/* Notifications scrollable */}
       <div className="flex-1 overflow-y-auto px-[20px] py-[15px]">
-        
         <Notifications />
       </div>
     </div>

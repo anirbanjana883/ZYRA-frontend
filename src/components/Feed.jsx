@@ -1,5 +1,6 @@
 import React from "react";
 import logo from "../assets/ZYRA_logo.png";
+import tagLine from "../assets/tag_line.png";
 import { FaRegHeart } from "react-icons/fa";
 import StoryDp from "./StoryDp";
 import Nav from "./Nav";
@@ -11,7 +12,7 @@ import { useNavigate } from "react-router-dom";
 function Feed() {
   const { postData } = useSelector((state) => state.post);
   const { userData } = useSelector((state) => state.user);
-  const {notificationData} = useSelector(state=>state.user)
+  const { notificationData } = useSelector((state) => state.user);
   const navigate = useNavigate();
   const { storyList, currentUserStory } = useSelector((state) => state.story);
 
@@ -22,10 +23,17 @@ function Feed() {
         {/* Left: Logo */}
         <img src={logo} alt="ZYRA logo" className="w-[50px]" />
 
+        <div className="flex-1 flex justify-center items-center px-4">
+          <img
+            src={tagLine}
+            alt="Tagline"
+            className="max-w-[150px] h-auto object-contain"
+          />
+        </div>
+
         {/* Right: Icons */}
         <div className="flex items-center gap-6">
-          <div className="relative"
-          onClick={()=>navigate("/notifications")}>
+          <div className="relative" onClick={() => navigate("/notifications")}>
             <FaRegHeart className="text-white w-[25px] h-[25px]" />
 
             {notificationData?.length > 0 &&
