@@ -1,3 +1,4 @@
+// OtherUser.jsx (Instagram-style card)
 import React from 'react';
 import { useSelector } from 'react-redux';
 import dp from "../assets/dp.png";
@@ -6,33 +7,39 @@ import FollowButton from './FollowButton';
 
 function OtherUser({ user }) {
   const { userData } = useSelector((state) => state.user);
-  const navigate = useNavigate()
+  const navigate = useNavigate();
+
   return (
-    <div className='w-full h-[80px] flex items-center justify-between border-b-2 border-gray-800'>
-      {/* Profile image & name */}
-      <div className="flex items-center gap-4">
-        <div className="w-[50px] h-[50px] border-2 border-black rounded-full cursor-pointer overflow-hidden"
-        onClick={()=>navigate(`/profile/${user.userName}`)}>
-          <img
-            src={user?.profileImage || dp}
-            alt="profile"
-            className="w-full h-full object-cover"
-          />
-        </div>
-        <div>
-          <div className="text-[18px] text-white font-semibold">
-            @{user?.userName}
-          </div>
-          <div className="text-[15px] text-gray-400 font-semibold">
-            {user?.name}
-          </div>
-        </div>
+    <div className="min-w-[150px] max-w-[160px] bg-gray-900 rounded-2xl p-4 flex flex-col items-center">
+      {/* Profile image */}
+      <div
+        className="w-[70px] h-[70px] rounded-full overflow-hidden border-2 border-gray-700 cursor-pointer"
+        onClick={() => navigate(`/profile/${user.userName}`)}
+      >
+        <img
+          src={user?.profileImage || dp}
+          alt="profile"
+          className="w-full h-full object-cover"
+        />
       </div>
 
-      {/* follow button */}
-      <div>
-        <FollowButton tailwind={'px-[10px] w-[100px] py-[5px] h-[40px] bg-white rounded-2xl cursor-pointer'} targetUserId={user._id}/>
+      {/* Username & name */}
+      <div className="mt-2 text-center">
+        <p className="text-white text-sm font-semibold">@{user?.userName}</p>
+        <p className="text-gray-400 text-xs">{user?.name}</p>
       </div>
+
+      {/* Follow button */}
+      {userData._id !== user._id && (
+        <div className="mt-3">
+          <FollowButton
+            tailwind={
+              "px-[10px] w-[100px] py-[5px] h-[36px] bg-white text-black text-sm font-semibold rounded-2xl cursor-pointer"
+            }
+            targetUserId={user._id}
+          />
+        </div>
+      )}
     </div>
   );
 }

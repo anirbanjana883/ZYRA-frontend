@@ -5,10 +5,10 @@ const userSlice = createSlice({
   initialState: {
     userData: null,
     suggestedUser: null,
-    profileData : null,
-    following:[],
-    searchData:null,
-    notificationData:[]
+    profileData: null,
+    following: [],
+    searchData: null,
+    notificationData: [],
   },
   reducers: {
     setUserData: (state, action) => {
@@ -20,25 +20,61 @@ const userSlice = createSlice({
     setProfileData: (state, action) => {
       state.profileData = action.payload;
     },
-    setFollowing:(state,action)=>{
+    setFollowing: (state, action) => {
       state.following = action.payload;
     },
-    toggleFollow:(state,action)=>{
+    toggleFollow: (state, action) => {
       const targetUserId = action.payload;
-      if(state.following.includes(targetUserId)){
-        state.following = state.following.filter(id=>id!==targetUserId)
-      }else{
-        state.following.push(targetUserId)
+      if (state.following.includes(targetUserId)) {
+        state.following = state.following.filter((id) => id !== targetUserId);
+      } else {
+        state.following.push(targetUserId);
       }
     },
-    setSearchData:(state,action)=>{
+    setSearchData: (state, action) => {
       state.searchData = action.payload;
     },
     setNotificationData: (state, action) => {
       state.notificationData = action.payload;
     },
+
+    addNotification: (state, action) => {
+      state.notificationData = [action.payload, ...state.notificationData];
+    },
+
+    updateNotification: (state, action) => {
+      const notificationId = action.payload;
+      state.notificationData = state.notificationData.map((noti) =>
+        noti._id === notificationId ? { ...noti, isRead: true } : noti
+      );
+    },
+
+    //  Mark all notifications as read
+    markAllAsRead: (state) => {
+      state.notificationData = state.notificationData.map((noti) => ({
+        ...noti,
+        isRead: true,
+      }));
+    },
+    removeNotification: (state, action) => {
+      state.notificationData = state.notificationData.filter(
+        (noti) => noti._id !== action.payload
+      );
+    },
   },
 });
 
-export const { setUserData, setSuggestedUserData ,setProfileData ,setFollowing ,toggleFollow , setSearchData , setNotificationData} = userSlice.actions;
+export const {
+  setUserData,
+  setSuggestedUserData,
+  setProfileData,
+  setFollowing,
+  toggleFollow,
+  setSearchData,
+  setNotificationData,
+  addNotification,
+  updateNotification,
+  markAllAsRead,
+  removeNotification
+} = userSlice.actions;
 export default userSlice.reducer;

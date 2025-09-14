@@ -1,22 +1,26 @@
-import React, { useState } from "react";
+import React from "react";
 import logo from "../assets/ZYRA_logo.png";
+import tagLine from "../assets/tag_line.png";
 import { FaRegHeart } from "react-icons/fa";
 import dp from "../assets/dp.png";
 import { useDispatch, useSelector } from "react-redux";
-import axios from 'axios';
-import { serverUrl } from '../App';
+import axios from "axios";
+import { serverUrl } from "../App";
 import { setUserData } from "../redux/userSlice";
-import OtherUser from "./OtherUser";
+import { useNavigate } from "react-router-dom";
+import Notifications from "../pages/Notifications";
 
 function LeftHome() {
-  const { userData, suggestedUser } = useSelector((state) => state.user); 
-  const {notificationData} = useSelector(state=>state.user)
-  const[showNotificaton , setShowNotification] = useState(false)
+  const { userData, notificationData } = useSelector((state) => state.user);
+  
   const dispatch = useDispatch();
+  const navigate = useNavigate();
 
   const handleLogOut = async () => {
     try {
-      await axios.get(`${serverUrl}/api/auth/signout`, { withCredentials: true });
+      await axios.get(`${serverUrl}/api/auth/signout`, {
+        withCredentials: true,
+      });
       dispatch(setUserData(null));
     } catch (error) {
       console.log(error);
@@ -24,31 +28,26 @@ function LeftHome() {
   };
 
   return (
-    <div className="w-[25%] hidden lg:block min-h-[100vh] bg-black border-r-2 border-gray-900">
-      
-      {/* Logo and notification */}
-      <div className="w-full h-[100px] flex items-center justify-between px-[20px]">
+    <div className="w-[25%] hidden lg:flex flex-col bg-black border-r-2 border-gray-900 h-screen">
+      {/* Logo and notification button */}
+      <div className="w-full h-[100px] flex items-center justify-between px-[20px] shrink-0">
         <img src={logo} alt="ZYRA logo" className="w-[50px]" />
-        <div className="relative">
-          <FaRegHeart className="text-white w-[25px] h-[25px]" />
-
-          {(notificationData?.length > 0 &&
-          notificationData.some((noti)=>noti.isRead === false))
-          && 
-          <div className="w-[10px] h-[10px] bg-red-600 rounded-full absolute top-0 right-[-5px]"></div>
-
-          }
-
-        </div>
+        <img src={tagLine} alt="ZYRA logo" className="w-[50px]" />
+        <div
+          className="relative cursor-pointer lg:hidden"
+          onClick={() => navigate("/notifications")}
+        >
         
+        </div>
       </div>
 
       {/* Profile & logout */}
-      <div className="flex items-center justify-between px-[20px] py-[15px] border-b-2 border-b-gray-900">
-        
-        {/* Profile image & name */}
+      <div className="flex items-center justify-between px-[20px] py-[15px] border-b-2 border-b-gray-900 shrink-0">
         <div className="flex items-center gap-4">
-          <div className="w-[70px] h-[70px] border-2 border-black rounded-full cursor-pointer overflow-hidden">
+          <div
+            className="w-[70px] h-[70px] border-2 border-black rounded-full cursor-pointer overflow-hidden"
+            onClick={() => navigate(`/profile/${userData.userName}`)}
+          >
             <img
               src={userData?.profileImage || dp}
               alt="profile"
@@ -65,7 +64,6 @@ function LeftHome() {
           </div>
         </div>
 
-        {/* Logout button */}
         <div
           className="text-red-500 font-semibold cursor-pointer"
           onClick={handleLogOut}
@@ -74,12 +72,16 @@ function LeftHome() {
         </div>
       </div>
 
-      {/* Suggested users */}
-      <div className="px-[20px] py-[10px] border-b-2 border-b-gray-900">
-        <h1 className="text-white text-[19px] mb-2">Suggested Users</h1>
-        {suggestedUser && suggestedUser.map((user, index) => (
-          <OtherUser key={index} user={user} />
-        ))}
+       {/* Notifications section header */}
+      <div className="w-full px-30 py-3 border-b border-gray-900 items-centercenter">
+        <h2 className="text-white text-lg font-semibold">Notifications</h2>
+      </div>
+      
+
+      {/* Notifications scrollable */}
+      <div className="flex-1 overflow-y-auto px-[20px] py-[15px]">
+        
+        <Notifications />
       </div>
     </div>
   );

@@ -49,7 +49,7 @@ function App() {
   
   useEffect(() => {
     if (userData) {
-      // ✅ use centralized initSocket
+      //  use centralized initSocket
       const socketIo = initSocket(userData._id);
 
       dispatch(setSocket(socketIo));
@@ -59,9 +59,7 @@ function App() {
         dispatch(setOnlineUsers(users));
       });
 
-      // ------------------------------
       // Real-time messaging listeners
-      // ------------------------------
 
       socketIo.on("receiveMessage", (message) => {
         dispatch(addMessage(message));
@@ -83,7 +81,7 @@ function App() {
         }));
       });
 
-      // ✅ cleanup
+      //  cleanup
       return () => {
         closeSocket();
         dispatch(setSocket(null));

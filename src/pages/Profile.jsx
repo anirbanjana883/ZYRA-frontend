@@ -11,6 +11,7 @@ import { useNavigate } from "react-router-dom";
 import FollowButton from "../components/FollowButton";
 import Post from "../components/Post";
 import { setSelectedUser } from "../redux/messageSlice";
+import OtherUser from "../components/OtherUser"; 
 
 function Profile() {
   const { userName } = useParams();
@@ -19,6 +20,7 @@ function Profile() {
   const { postData } = useSelector((state) => state.post);
 
   const [postType, setPostType] = useState("");
+  const [suggestedUser, setSuggestedUser] = useState([]); 
   const navigate = useNavigate();
 
   const handleProfile = async () => {
@@ -45,9 +47,27 @@ function Profile() {
     }
   };
 
+  // ✅ [CHANGE] Fetch suggested users
+  const fetchSuggestedUsers = async () => {
+    try {
+      const result = await axios.get(`${serverUrl}/api/user/suggested`, {
+        withCredentials: true,
+      });
+      setSuggestedUser(result.data);
+    } catch (error) {
+      console.error("Failed to fetch suggested users:", error);
+    }
+  };
+
   useEffect(() => {
     handleProfile();
   }, [userName]);
+
+  useEffect(() => {
+    if (profileData?._id === userData?._id) {
+      fetchSuggestedUsers();
+    }
+  }, [profileData, userData]);
 
   return (
     <div className="w-full min-h-screen bg-black text-black">
@@ -191,16 +211,31 @@ function Profile() {
             <button
               className="px-[10px] min-w-[150px] py-[5px] h-[40px] cursor-pointer
       bg-white text-black font-semibold rounded-2xl shadow hover:bg-gray-200 transition duration-200"
-              onClick={()=>{
-                dispatch(setSelectedUser(profileData))
-                navigate("/messageArea")
-              }}  
+              onClick={() => {
+                dispatch(setSelectedUser(profileData));
+                navigate("/messageArea");
+              }}
             >
               Message
             </button>
           </>
         )}
       </div>
+
+            {/*  [CHANGE FIXED] Suggested Users - only for my profile */}
+      {profileData?._id === userData?._id && suggestedUser.length > 0 && (
+        <div className="px-4 py-3">
+          <h2 className="text-white text-lg font-semibold mb-2">
+            Suggested for you
+          </h2>
+          <div className="flex gap-4 overflow-x-auto scrollbar-hide">
+            {suggestedUser.map((user) => (
+              <OtherUser key={user._id} user={user} />
+            ))}
+          </div>
+        </div>
+      )}
+
 
       {/* posts of own  */}
       <div className="w-full min-h-[100vh] flex justify-center">

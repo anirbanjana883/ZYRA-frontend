@@ -186,7 +186,7 @@ function MessageArea() {
 
       {/* messages with Today/Yesterday/Date grouping */}
       <div className="w-full h-[80%] pt-[100px] pb-[120px] lg:pb-[150px] px-[40px] flex flex-col gap-[20px] overflow-auto bg-black">
-        {messages &&
+        {messages && 
           messages.map((mess, index) => {
             const senderId =
               typeof mess.sender === "object" ? mess.sender._id : mess.sender;

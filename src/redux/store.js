@@ -13,7 +13,7 @@ const store = configureStore({
     loop: loopSlice,
     story: storySlice,
     message:messageSlice,
-    socket:socketSlice
+    socket:socketSlice,
   },
 });
 
