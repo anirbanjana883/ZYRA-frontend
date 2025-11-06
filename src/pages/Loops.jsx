@@ -15,10 +15,10 @@ function Loops() {
             <div className="w-full h-[80px] flex items-center gap-[20px] px-[20px] fixed top-[10px] left-[10px] z-[100]">
                 <IoArrowBack
                     size={30}
-                    className="text-white cursor-pointer hover:text-gray-300"
+                    className="text-[#00ffff] hover:text-[#ff00ff] cursor-pointer"
                     onClick={() => navigate(`/`)}
                 />
-                <h1 className="text-white text-[20px] font-semibold">Loops</h1>
+                <h1 className="text-[#00ffff] hover:text-[#ff00ff] text-[20px] font-semibold">Loops</h1>
             </div>
 
             {/* Loops List */}

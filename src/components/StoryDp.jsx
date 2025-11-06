@@ -9,69 +9,66 @@ import axios from "axios";
 function StoryDp({ profileImage, userName = "user", story }) {
   const navigate = useNavigate();
   const { userData } = useSelector((state) => state.user);
-  const { storyData,storyList } = useSelector((state) => state.story);
-  const [viewed , setViewed] = useState(false)
+  const { storyData, storyList } = useSelector((state) => state.story);
+  const [viewed, setViewed] = useState(false);
 
-  useEffect(()=>{
-    if(story?.viewers?.some((viewer)=>viewer?._id?.toString()===userData._id.toString()
-    || viewer?.toString() ==userData._id.toString())){
+  useEffect(() => {
+    if (
+      story?.viewers?.some(
+        (viewer) =>
+          viewer?._id?.toString() === userData._id.toString() ||
+          viewer?.toString() == userData._id.toString()
+      )
+    ) {
       setViewed(true);
-    }else{
-      setViewed(false)
+    } else {
+      setViewed(false);
     }
-  },[story,userData,storyData,storyList])
+  }, [story, userData, storyData, storyList]);
 
   const handleViewers = async () => {
-    if (!story?._id) return; 
+    if (!story?._id) return;
     try {
-      const result = await axios.get(
-        `${serverUrl}/api/story/view/${story._id}`,
-        { withCredentials: true }
-      );
+      await axios.get(`${serverUrl}/api/story/view/${story._id}`, {
+        withCredentials: true,
+      });
     } catch (error) {
       console.log(error);
     }
   };
 
   const handleClick = async () => {
-    // Your Story: upload if none, else view
     if (!story && userName === "Your Story") {
       navigate("/upload");
-    } else if (story && userName === "Your Story") {
-      await handleViewers();
-      navigate(`/story/${userData.userName}`);
     } else {
       await handleViewers();
-      navigate(`/story/${userName}`);
+      navigate(`/story/${userName === "Your Story" ? userData.userName : userName}`);
     }
   };
-
-  
 
   return (
     <div
       className="flex flex-col items-center gap-2 group cursor-pointer"
       onClick={handleClick}
     >
-      {/* Outer ring (only if story exists) */}
+      {/* Outer ring */}
       <div
-        className={`w-[72px] h-[72px] ${
-          !story ? null:
-          !viewed ? "bg-gradient-to-b from-pink-500 to-yellow-500" :
-          "bg-gradient-to-b from-gray-500 to-black-800"
-        } rounded-full flex justify-center relative items-center transition-all duration-300 group-hover:scale-105 group-hover:shadow-lg`}
+        className={`w-[72px] h-[72px] rounded-full flex justify-center items-center relative transition-all duration-300
+          ${!story ? "bg-black/70" : !viewed ? "bg-gradient-to-tr from-blue-400 to-purple-600" : "bg-gray-700"}
+          group-hover:scale-105 group-hover:shadow-lg`}
       >
         {/* Profile image */}
-        <div className="w-[66px] h-[66px] border-2 border-black rounded-full overflow-hidden relative">
+        <div className="w-[66px] h-[66px] border-2 border-white rounded-full overflow-hidden relative">
           <img
             src={profileImage || dp}
             alt={userName}
             className="w-full h-full object-cover"
           />
         </div>
-        {/* Plus icon only if no story AND it's "Your Story" */}
+
+        {/* Plus icon */}
         {!story && userName === "Your Story" && (
-          <FiPlusCircle className="text-black absolute bottom-[2px] right-[2px] bg-white rounded-full w-[22px] h-[22px]" />
+          <FiPlusCircle className="text-blue-500 absolute bottom-[2px] right-[2px] bg-white rounded-full w-[22px] h-[22px]" />
         )}
       </div>
 

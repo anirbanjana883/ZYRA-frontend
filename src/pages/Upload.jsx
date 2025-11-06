@@ -9,11 +9,9 @@ import { useDispatch, useSelector } from "react-redux";
 
 import { setPostData } from "../redux/postSlice";
 import { setLoopData } from "../redux/loopSlice";
-import { setStoryData } from "../redux/storySlice";
+import { setStoryData, setCurrentUserStory } from "../redux/storySlice";
 
 import { ClipLoader } from "react-spinners";
-import { setUserData } from "../redux/userSlice";
-import { setCurrentUserStory } from "../redux/storySlice";
 
 function Upload() {
   const navigate = useNavigate();
@@ -32,11 +30,9 @@ function Upload() {
 
   const handleMedia = (e) => {
     const file = e.target.files[0];
-    if (file.type.includes("image")) {
-      setMediaType("image");
-    } else if (file.type.includes("video")) {
-      setMediaType("video");
-    }
+    if (file.type.includes("image")) setMediaType("image");
+    else if (file.type.includes("video")) setMediaType("video");
+
     setBackendMedia(file);
     setFrontendMedia(URL.createObjectURL(file));
   };
@@ -80,39 +76,33 @@ function Upload() {
     }
   };
 
-const uploadStory = async () => {
-  try {
-    const formData = new FormData();
-    formData.append("media", backendMedia);
-    formData.append("mediaType", mediaType);
+  const uploadStory = async () => {
+    try {
+      const formData = new FormData();
+      formData.append("media", backendMedia);
+      formData.append("mediaType", mediaType);
 
-    const result = await axios.post(`${serverUrl}/api/story/upload`, formData, {
-      withCredentials: true,
-    });
+      const result = await axios.post(`${serverUrl}/api/story/upload`, formData, {
+        withCredentials: true,
+      });
 
-    dispatch(setStoryData([result.data]));   // keep only the latest story
-    dispatch(setCurrentUserStory(result.data)); // update the user's story
+      dispatch(setStoryData([result.data])); 
+      dispatch(setCurrentUserStory(result.data));
 
-    setLoading(false);
-    navigate("/");
-
-  } catch (error) {
-    setLoading(false);
-    console.log("Failed to upload story:", error.response?.data || error.message);
-  }
-};
-
-
+      setLoading(false);
+      navigate("/");
+    } catch (error) {
+      setLoading(false);
+      console.log("Failed to upload story:", error.response?.data || error.message);
+    }
+  };
 
   const handleUpload = async () => {
     setLoading(true);
-    if (uploadType === "Post") {
-      await uploadPost();
-    } else if (uploadType === "Loop") {
-      await uploadLoop();
-    } else if (uploadType === "Story") {
-      await uploadStory();
-    }
+    if (uploadType === "Post") await uploadPost();
+    else if (uploadType === "Loop") await uploadLoop();
+    else if (uploadType === "Story") await uploadStory();
+
     // Reset state after upload
     setFrontendMedia(null);
     setBackendMedia(null);
@@ -120,123 +110,103 @@ const uploadStory = async () => {
   };
 
   return (
-    <div className="w-full min-h-[100vh] bg-black flex flex-col items-center ">
-      {/* back button */}
-      <div className="w-full h-[80px] flex items-center gap-[20px] px-[20px]">
+    <div className="w-full min-h-[100vh] bg-black flex flex-col items-center backdrop-blur-sm overflow-hidden">
+      {/* Back Button */}
+      <div className="w-full h-[80px] flex items-center gap-4 px-6 mt-2">
         <IoArrowBack
           size={30}
-          className="text-white cursor-pointer hover:text-gray-300"
+          className="text-blue-400 hover:text-blue-200 cursor-pointer transition duration-300 shadow-[0_0_10px_#00d4ff,0_0_20px_#9500ff]"
           onClick={() => navigate("/")}
         />
-        <h1 className="text-white text-[20px] font-semibold">Upload Media</h1>
+        <h1 className="text-white text-[20px] font-semibold drop-shadow-[0_0_8px_rgba(0,212,255,0.6)]">
+          Upload Media
+        </h1>
       </div>
 
-      {/* for post story loop button */}
-      <div className="w-[70%] max-w-[600px] h-[70px] bg-white rounded-full flex justify-around items-center gap-[10px]">
-        <div
-          className={`w-[28%] h-[80%] flex justify-center items-center text-[19px] font-semibold rounded-full cursor-pointer ${
-            uploadType === "Post"
-              ? "bg-black text-white shadow-2xl shadow-black"
-              : "hover:bg-black hover:text-white hover:shadow-2xl hover:shadow-black"
-          }`}
-          onClick={() => setUploadType("Post")}
-        >
-          Post
-        </div>
-
-        <div
-          className={`w-[28%] h-[80%] flex justify-center items-center text-[19px] font-semibold rounded-full cursor-pointer ${
-            uploadType === "Story"
-              ? "bg-black text-white shadow-2xl shadow-black"
-              : "hover:bg-black hover:text-white hover:shadow-2xl hover:shadow-black"
-          }`}
-          onClick={() => setUploadType("Story")}
-        >
-          Story
-        </div>
-
-        <div
-          className={`w-[28%] h-[80%] flex justify-center items-center text-[19px] font-semibold rounded-full cursor-pointer ${
-            uploadType === "Loop"
-              ? "bg-black text-white shadow-2xl shadow-black"
-              : "hover:bg-black hover:text-white hover:shadow-2xl hover:shadow-black"
-          }`}
-          onClick={() => setUploadType("Loop")}
-        >
-          Loop
-        </div>
+      {/* Upload Type Selector */}
+      <div className="w-[70%] max-w-[600px] h-[70px] bg-black/70 text-white border border-blue-500/30 rounded-full flex justify-around items-center gap-3 px-2 py-1 mt-5">
+        {["Post", "Story", "Loop"].map((type) => (
+          <div
+            key={type}
+            className={`w-[28%] h-[80%] flex justify-center items-center text-[19px] font-semibold rounded-full cursor-pointer transition-all duration-300
+              ${
+                uploadType === type
+                  ? "bg-gradient-to-r from-[#9500ff] to-[#00d4ff] text-white shadow-[0_0_15px_#00d4ff]"
+                  : "hover:bg-gradient-to-r hover:from-[#9500ff] hover:to-[#00d4ff] hover:text-white hover:shadow-[0_0_15px_#00d4ff]"
+              }`}
+            onClick={() => setUploadType(type)}
+          >
+            {type}
+          </div>
+        ))}
       </div>
 
-      {/* upload form */}
+      {/* Upload Form */}
       {!frontendMedia && (
         <div
-          className="w-[80%] max-w-[500px] h-[250px] bg-[#0e1316] border-2 border-gray-800 
-            flex flex-col items-center justify-center gap-[8px] mt-[15vh] 
-            rounded-2xl cursor-pointer hover:bg-[#353a3d]"
+          className="w-[80%] max-w-[500px] h-[250px] bg-black/70 backdrop-blur-md border-2 border-blue-500/40 
+                    flex flex-col items-center justify-center gap-3 mt-[15vh] rounded-2xl cursor-pointer
+                    hover:border-blue-400 hover:shadow-[0_0_25px_#00d4ff] transition-all duration-300"
           onClick={() => mediaInput.current.click()}
         >
-            <input
-              type="file"
-              hidden
-              ref={mediaInput}
-              onChange={handleMedia}
-              accept={uploadType.toLowerCase() === "loop" ? "video/*" : "image/*,video/*"}
-            />
-
-          <FaRegSquarePlus className="text-white w-[25px] h-[25px]" />
-          <div className="text-white text-[19px] font-semibold">
+          <input
+            type="file"
+            hidden
+            ref={mediaInput}
+            onChange={handleMedia}
+            accept={uploadType.toLowerCase() === "loop" ? "video/*" : "image/*,video/*"}
+          />
+          <FaRegSquarePlus className="text-white w-[30px] h-[30px] drop-shadow-[0_0_8px_#00d4ff]" />
+          <div className="text-white text-[19px] font-semibold drop-shadow-[0_0_8px_#00d4ff]">
             Upload {uploadType}
           </div>
         </div>
       )}
 
       {frontendMedia && (
-        <div className="w-[80%] max-w-[500px] h-[400px] flex flex-col items-center justify-center mt-[3vh]">
-          {/* image */}
+        <div className="w-[80%] max-w-[500px] flex flex-col items-center justify-center mt-[3vh] gap-4">
+          {/* Image */}
           {mediaType === "image" && (
-            <div className="w-[80%] max-w-[500px] h-[400px] flex flex-col items-center justify-center mt-[3vh]">
+            <div className="w-full h-[400px] rounded-2xl overflow-hidden shadow-[0_0_20px_#00d4ff] border-2 border-blue-400">
               <img
                 src={frontendMedia}
                 alt={`${uploadType} preview`}
-                className="h-full w-full object-cover rounded-2xl"
+                className="w-full h-full object-cover rounded-2xl"
               />
-              {uploadType.toLowerCase() !== "story" && (
-                <input
-                  type="text"
-                  className="w-full border-b-gray-400 border-b-2 outline-none px-[10px] py-[5px] text-white mt-[20px]"
-                  placeholder="Write caption"
-                  onChange={(e) => setCaption(e.target.value)}
-                  value={caption}
-                />
-              )}
             </div>
           )}
 
-          {/* video */}
+          {/* Video */}
           {mediaType === "video" && (
-            <div className="w-[60%] max-w-[300px] h-[350px] flex flex-col items-center justify-center mt-[3vh]">
+            <div className="w-full max-w-[400px] h-[350px] rounded-2xl overflow-hidden shadow-[0_0_20px_#00d4ff] border-2 border-blue-400">
               <VideoPlayer media={frontendMedia} />
-              {uploadType.toLowerCase() !== "story" && (
-                <input
-                  type="text"
-                  className="w-full border-b-gray-400 border-b-2 outline-none px-[10px] py-[5px] text-white mt-[20px]"
-                  placeholder="Write caption"
-                  onChange={(e) => setCaption(e.target.value)}
-                  value={caption}
-                />
-              )}
             </div>
+          )}
+
+          {/* Caption */}
+          {uploadType.toLowerCase() !== "story" && (
+            <input
+              type="text"
+              className="w-full px-3 py-2 mt-4 rounded-md bg-black/50 border-b-2 border-blue-400/50 text-white placeholder-blue-300 outline-none drop-shadow-[0_0_10px_#00d4ff]"
+              placeholder="Write caption"
+              value={caption}
+              onChange={(e) => setCaption(e.target.value)}
+            />
           )}
         </div>
       )}
 
+      {/* Upload Button */}
       {frontendMedia && (
         <button
-          className="px-[10px] w-[60%] max-w-[400px] py-[5px] h-[50px] bg-[white] mt-[50px] cursor-pointer rounded-2xl font-semibold text-[20px] text-black hover:bg-gray-200"
+          className="w-[60%] max-w-[400px] py-3 px-5 mt-6 rounded-full
+                     bg-gradient-to-br from-[#9500ff] to-[#00d4ff] text-white font-semibold text-lg
+                     shadow-[0_0_15px_#9500ff,0_0_25px_#00d4ff] hover:shadow-[0_0_25px_#00d4ff,0_0_40px_#9500ff]
+                     transition-all duration-300 cursor-pointer"
           onClick={handleUpload}
           disabled={loading}
         >
-          {loading ? <ClipLoader size={30} color="black" /> : `Upload ${uploadType}`}
+          {loading ? <ClipLoader size={30} color="white" /> : `Upload ${uploadType}`}
         </button>
       )}
     </div>

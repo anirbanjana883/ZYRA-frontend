@@ -26,7 +26,7 @@ function NotificationCard({ noti }) {
       {isVisible && noti && (
         <motion.div
           className={`w-full flex justify-between items-center p-3 sm:p-4 rounded-xl cursor-pointer transition
-            ${noti.isRead ? "bg-gray-800" : "bg-gray-700 border border-blue-400"}`}
+            ${noti.isRead ? "bg-[#0a0f1f]" : "bg-[#0b1424] border border-blue-500"}`}
           initial={{ x: 0, opacity: 1 }}
           animate={{ x: 0, opacity: 1 }}
           exit={{ x: -200, opacity: 0 }}
@@ -39,7 +39,7 @@ function NotificationCard({ noti }) {
         >
           {/* Left: Profile image + text */}
           <div className="flex items-center gap-3 sm:gap-4">
-            <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-full overflow-hidden border-2 border-gray-700">
+            <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-full overflow-hidden border-2 border-blue-500">
               <img
                 src={noti?.sender?.profileImage || dp}
                 alt="profile"
@@ -47,14 +47,14 @@ function NotificationCard({ noti }) {
               />
             </div>
             <div className="flex flex-col">
-              <span className="text-white font-semibold text-sm sm:text-base">
+              <span className="text-cyan-400 font-semibold text-sm sm:text-base" style={{ textShadow: '0 0 2px rgba(0,255,255,0.6)' }}>
                 @{noti?.sender?.userName || "Unknown"}
               </span>
-              <span className="text-gray-300 text-xs sm:text-sm">
+              <span className="text-white text-xs sm:text-sm" style={{ textShadow: '0 0 1px rgba(255,255,255,0.5)' }}>
                 {noti?.message || "No message"}
               </span>
               {noti?.createdAt && (
-                <span className="text-gray-400 text-xs mt-1">
+                <span className="text-gray-400 text-xs mt-1" style={{ textShadow: '0 0 1px rgba(200,200,200,0.4)' }}>
                   {new Date(noti.createdAt).toLocaleTimeString([], {
                     hour: "2-digit",
                     minute: "2-digit",
@@ -66,7 +66,7 @@ function NotificationCard({ noti }) {
 
           {/* Right: Post/Loop preview */}
           {(noti?.post || noti?.loop) && (
-            <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-full overflow-hidden border-2 border-gray-700">
+            <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-full overflow-hidden border-2 border-blue-500">
               {(() => {
                 const mediaItem = noti.post || noti.loop;
                 if (!mediaItem?.media) return null;
@@ -92,7 +92,7 @@ function NotificationCard({ noti }) {
 
       {/* Default message if no notification */}
       {!noti && (
-        <div className="flex flex-col items-center justify-start h-60 sm:h-60 mt-10 text-gray-400 gap-2">
+        <div className="flex flex-col items-center justify-start h-60 sm:h-60 mt-10 text-cyan-400 gap-2" style={{ textShadow: '0 0 2px rgba(0,255,255,0.5)' }}>
           <p className="text-lg sm:text-xl font-semibold">No notifications yet</p>
           <p className="text-sm sm:text-base">All your notifications will appear here.</p>
         </div>

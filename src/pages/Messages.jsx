@@ -16,46 +16,39 @@ function Messages() {
 
   const [search, setSearch] = useState("");
 
-  // -----------------------------
-  // filter chats by search
-  // -----------------------------
   const filteredChats = (prevChatUsers || [])
     .filter((user) =>
       user.userName?.toLowerCase().includes(search.toLowerCase())
     )
     .sort(
-      // ✅ sort by last message time descending
       (a, b) =>
         new Date(b.lastMessageTime || 0) - new Date(a.lastMessageTime || 0)
     );
 
   return (
-    <div className="w-full min-h-[100vh] flex flex-col bg-black gap-[20px] p-[20px]">
-      {/* back button & header */}
-      <div className="w-full h-[80px] flex items-center gap-[20px] px-[20px]">
+    <div className="w-full min-h-[100vh] flex flex-col bg-gradient-to-b from-black via-[#0a0f1f] to-[#01030a] gap-5 p-5">
+      {/* Back & header */}
+      <div className="w-full h-[80px] flex items-center gap-4 px-2 lg:px-5">
         <IoArrowBack
-          size={30}
-          className="text-white cursor-pointer hover:text-gray-300 lg:hidden w-[25px] h-[25px]"
+          size={28}
+          className="text-blue-400 cursor-pointer hover:text-blue-200 lg:hidden"
           onClick={() => navigate(`/`)}
         />
         <h1 className="text-white text-[20px] font-semibold">Messages</h1>
       </div>
 
-      {/* search bar */}
+      {/* Search bar */}
       <input
         type="text"
         placeholder="Search chats"
         value={search}
         onChange={(e) => setSearch(e.target.value)}
-        className="w-full p-2 rounded-lg bg-gray-900 text-white placeholder-gray-400 outline-none mb-2"
+        className="w-full p-2 rounded-lg bg-[#0c1b3b] text-white placeholder-blue-400 outline-none mb-2 border border-blue-700 focus:border-blue-400"
       />
 
-      {/* online users */}
-      <h2 className="text-gray-400 text-sm px-2">Online</h2>
-      <div
-        className="w-full h-[80px] flex gap-[20px] justify-start items-center overflow-x-auto
-      p-[20px] border-b-2 border-gray-800"
-      >
+      {/* Online users */}
+      <h2 className="text-blue-400 text-sm px-2">Online</h2>
+      <div className="w-full h-[80px] flex gap-4 justify-start items-center overflow-x-auto p-2 border-b border-blue-700">
         {userData.following?.map(
           (user, index) =>
             onlineUsers?.includes(user._id) && (
@@ -64,14 +57,14 @@ function Messages() {
         )}
       </div>
 
-      {/* previously chatted users */}
-      <h2 className="text-gray-400 text-sm px-2 mt-4">Chats</h2>
-      <div className="w-full h-full overflow-auto flex flex-col gap-[10px]">
+      {/* Previously chatted users */}
+      <h2 className="text-blue-400 text-sm px-2 mt-4">Chats</h2>
+      <div className="w-full h-full overflow-auto flex flex-col gap-2 pb-5">
         {filteredChats.length === 0 ? (
-          <div className="flex flex-col items-center justify-center text-gray-400 mt-10">
+          <div className="flex flex-col items-center justify-center text-blue-400 mt-10 opacity-70">
             <FiMessageSquare size={80} className="mb-4 opacity-50" />
             <p className="text-lg">No conversations found</p>
-            <p className="text-sm text-gray-500">
+            <p className="text-sm text-blue-300">
               Start chatting with your friends!
             </p>
           </div>
@@ -79,13 +72,13 @@ function Messages() {
           filteredChats.map((user, index) => (
             <div
               key={user._id || index}
-              className="flex items-center gap-[10px] p-2 rounded-lg hover:bg-gray-800 cursor-pointer transition"
+              className="flex items-center gap-3 p-2 rounded-lg hover:bg-[#0c1b3b] cursor-pointer transition border border-transparent hover:border-blue-700"
               onClick={() => {
                 dispatch(setSelectedUser(user));
                 navigate("/messageArea");
               }}
             >
-              {/* avatar with online dot */}
+              {/* Avatar with online dot */}
               <div className="relative w-[50px] h-[50px]">
                 <img
                   src={user?.profileImage || dp}
@@ -97,7 +90,7 @@ function Messages() {
                 )}
               </div>
 
-              {/* username + status */}
+              {/* Username + status */}
               <div className="flex flex-col flex-1">
                 <div className="text-white text-[16px] font-semibold">
                   {user.userName}
@@ -105,7 +98,7 @@ function Messages() {
                 {onlineUsers?.includes(user._id) ? (
                   <div className="text-green-500 text-[13px]">Active now</div>
                 ) : (
-                  <div className="text-gray-500 text-[13px]">
+                  <div className="text-blue-300 text-[13px]">
                     Last seen:{" "}
                     {user.lastSeen
                       ? new Date(user.lastSeen).toLocaleString()
@@ -114,8 +107,8 @@ function Messages() {
                 )}
               </div>
 
-              {/* last message time */}
-              <div className="text-gray-500 text-[12px]">
+              {/* Last message time */}
+              <div className="text-blue-300 text-[12px]">
                 {user.lastMessageTime
                   ? new Date(user.lastMessageTime).toLocaleTimeString([], {
                       hour: "2-digit",

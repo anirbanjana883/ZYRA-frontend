@@ -4,6 +4,7 @@ const loopSlice = createSlice({
   name: "loop",
   initialState: {
     loopData: [], // stores all loops in the app (feed)
+    isMute: true,
   },
   reducers: {
     //  Set all loops at once (used when fetching loops from backend)
@@ -67,6 +68,14 @@ const loopSlice = createSlice({
         (loop) => loop._id !== action.payload
       );
     },
+
+     toggleMute: (state) => {
+      state.isMute = !state.isMute;
+    },
+
+    setMute: (state, action) => {
+      state.isMute = action.payload; // true/false
+    },
   },
 });
 
@@ -79,7 +88,9 @@ export const {
   addLoopReply,
   deleteLoopComment,
   deleteLoopReply,
-  deleteLoopFromState
+  deleteLoopFromState,
+  toggleMute,
+  setMute,
 } = loopSlice.actions;
 
 // Exporting the reducer to add into the store

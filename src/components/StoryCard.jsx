@@ -20,7 +20,6 @@ function StoryCard({ storyData }) {
   const optionsRef = useRef(null);
   const dispatch = useDispatch();
 
-  // Close dropdown on outside click
   useEffect(() => {
     function handleClickOutside(e) {
       if (optionsRef.current && !optionsRef.current.contains(e.target)) {
@@ -43,7 +42,6 @@ function StoryCard({ storyData }) {
     }
   };
 
-  // Auto progress story timer
   useEffect(() => {
     const interval = setInterval(() => {
       setProgress((prev) => {
@@ -60,15 +58,15 @@ function StoryCard({ storyData }) {
   }, [navigate]);
 
   return (
-    <div className="w-full max-w-[500px] h-screen mx-auto border-x border-gray-800 relative flex flex-col justify-center overflow-hidden bg-black">
-      {/* Story Background (Video/Image) */}
+    <div className="w-full max-w-[500px] h-screen mx-auto relative flex flex-col justify-center overflow-hidden bg-black">
+      {/* Story Background */}
       {!showViewers && (
         <div className="absolute inset-0 z-0">
           {storyData.mediaType === "image" ? (
             <img
               src={storyData.media}
               alt="story"
-              className="w-full h-full object-cover"
+              className="w-full h-full object-cover brightness-90"
             />
           ) : (
             <VideoPlayer media={storyData.media} />
@@ -78,65 +76,69 @@ function StoryCard({ storyData }) {
 
       {/* Top Header */}
       {!showViewers && (
-        <div className="absolute top-6 left-0 right-0 flex items-center gap-3 px-5 z-20">
-          <IoArrowBack
-            size={28}
-            className="text-white cursor-pointer hover:text-gray-300 transition-colors"
-            onClick={() => navigate(`/`)}
-          />
-          <div className="w-10 h-10 border-2 border-white rounded-full overflow-hidden">
-            <img
-              src={storyData.author?.profileImage || dp}
-              alt="profile"
-              className="w-full h-full object-cover"
-            />
-          </div>
-          <div className="max-w-[200px] font-semibold text-lg truncate text-white drop-shadow-md">
-            {storyData.author?.userName || "Unknown User"}
-          </div>
+        <div className="absolute top-6 left-0 flex items-center gap-3 px-5 z-20">
+  <IoArrowBack
+    size={28}
+    className="text-blue-400 cursor-pointer hover:text-blue-300 transition-colors"
+    onClick={() => navigate(`/`)}
+  />
+  <div className="w-12 h-12 border-2 border-blue-400 rounded-full overflow-hidden shadow-glow-blue">
+    <img
+      src={storyData.author?.profileImage || dp}
+      alt="profile"
+      className="w-full h-full object-cover"
+    />
+  </div>
 
-          {/* 3-dot menu (only for own story) */}
-          {storyData?.author?._id === userData?._id && (
-            <div className="ml-auto relative" ref={optionsRef}>
-              <button
-                onClick={() => setShowOptions(!showOptions)}
-                className="p-2 rounded-full hover:bg-black/30"
-              >
-                <HiOutlineDotsHorizontal className="text-white w-6 h-6" />
-              </button>
+  {/* Username + Menu together */}
+  <div className="flex items-center gap-2 max-w-[200px]">
+    <div className="font-bold text-lg truncate text-blue-400 drop-shadow-md">
+      {storyData.author?.userName || "Unknown User"}
+    </div>
 
-              {showOptions && (
-                <div className="absolute right-0 mt-2 w-32 bg-gray-900 text-white rounded-lg shadow-lg overflow-hidden">
-                  <button
-                    onClick={() => {
-                      setShowOptions(false);
-                      setShowDeleteModal(true);
-                    }}
-                    className="w-full text-left px-4 py-2 hover:bg-gray-700 cursor-pointer"
-                  >
-                    Delete Story
-                  </button>
-                </div>
-              )}
-            </div>
-          )}
-        </div>
+    {storyData?.author?._id === userData?._id && (
+      <div className="relative" ref={optionsRef}>
+        <button
+          onClick={() => setShowOptions(!showOptions)}
+          className="p-2 rounded-full hover:bg-blue-500/20 transition"
+        >
+          <HiOutlineDotsHorizontal className="text-blue-400 w-6 h-6" />
+        </button>
+
+        {showOptions && (
+          <div className="absolute right-0 mt-2 w-36 bg-gray-900 text-white rounded-lg shadow-glow-blue overflow-hidden">
+            <button
+              onClick={() => {
+                setShowOptions(false);
+                setShowDeleteModal(true);
+              }}
+              className="w-full text-left px-4 py-2 hover:bg-blue-600/40 cursor-pointer"
+            >
+              Delete Story
+            </button>
+          </div>
+        )}
+      </div>
+    )}
+  </div>
+</div>
+
       )}
 
       {/* Progress bar */}
       {!showViewers && (
         <div className="absolute top-1 left-1/2 transform -translate-x-1/2 w-[95%] max-w-[480px] h-1 bg-gray-700 rounded-full z-20">
           <div
-            className="h-full bg-white rounded-full transition-all duration-150 ease-linear"
+            className="h-full bg-red-400 rounded-full shadow-glow-blue transition-all duration-150 ease-linear"
             style={{ width: `${progress}%` }}
           ></div>
         </div>
       )}
 
-      {/* Viewer count strip (only owner can see) */}
-      {!showViewers && storyData?.author?.userName === userData?.userName && (
+      {/* Viewer strip */}
+      {!showViewers && storyData?.author?._id === userData?._id && (
         <div
-          className="absolute w-full h-16 flex items-center gap-3 bottom-0 p-4 left-0 text-white bg-gradient-to-t from-black/80 to-transparent cursor-pointer"
+          className="absolute w-full h-16 flex items-center gap-3 bottom-0 p-4 left-0 text-blue-400 bg-gradient-to-t from-black/80 to-transparent cursor-pointer"
           onClick={() => setShowViewers(true)}
         >
           <div className="flex items-center gap-2 text-sm font-medium">
@@ -153,7 +155,7 @@ function StoryCard({ storyData }) {
               .map((viewer, index) => (
                 <div
                   key={viewer._id || index}
-                  className="w-7 h-7 border-2 border-white rounded-full overflow-hidden shadow-md"
+                  className="w-7 h-7 border-2 border-blue-400 rounded-full overflow-hidden shadow-glow-blue"
                 >
                   <img
                     src={viewer?.profileImage || dp}
@@ -166,18 +168,18 @@ function StoryCard({ storyData }) {
         </div>
       )}
 
-      {/* Viewers List Overlay */}
+      {/* Viewers Overlay */}
       {showViewers && (
         <div
           className="absolute inset-0 bg-black/95 z-30 flex flex-col"
           onClick={() => setShowViewers(false)}
         >
           <div
-            className="w-full h-[70%] mt-auto rounded-t-2xl p-5 bg-gray-900 border-t border-gray-700"
+            className="w-full h-[70%] mt-auto rounded-t-2xl p-5 bg-gray-900 border-t border-blue-400"
             onClick={(e) => e.stopPropagation()}
           >
-            <div className="text-white flex items-center gap-2 mb-5 text-lg font-medium">
-              <FaEye className="text-white" />
+            <div className="text-blue-400 flex items-center gap-2 mb-5 text-lg font-semibold">
+              <FaEye className="text-blue-400" />
               <span className="font-bold">{storyData?.viewers?.length}</span>
               <span>Viewed by</span>
             </div>
@@ -186,16 +188,16 @@ function StoryCard({ storyData }) {
               {storyData?.viewers?.map((viewer, index) => (
                 <div
                   key={viewer._id || index}
-                  className="w-full flex items-center gap-4 p-2 rounded-lg hover:bg-gray-800 transition-colors"
+                  className="w-full flex items-center gap-4 p-2 rounded-lg hover:bg-blue-500/10 transition"
                 >
-                  <div className="w-12 h-12 border-2 border-white rounded-full overflow-hidden flex-shrink-0">
+                  <div className="w-12 h-12 border-2 border-blue-400 rounded-full overflow-hidden flex-shrink-0 shadow-glow-blue">
                     <img
                       src={viewer?.profileImage || dp}
                       alt="profile"
                       className="w-full h-full object-cover"
                     />
                   </div>
-                  <div className="text-white text-lg font-medium">
+                  <div className="text-blue-400 text-lg font-semibold">
                     {viewer?.userName || "Unknown User"}
                   </div>
                 </div>
@@ -205,16 +207,16 @@ function StoryCard({ storyData }) {
         </div>
       )}
 
-      {/* Delete Confirmation Modal */}
+      {/* Delete Modal */}
       {showDeleteModal && (
         <div className="fixed inset-0 flex items-center justify-center bg-black/50 z-50">
-          <div className="bg-gray-900 p-6 rounded-2xl shadow-lg w-[300px] text-center">
-            <p className="text-white mb-4">
+          <div className="bg-gray-900 p-6 rounded-2xl shadow-glow-blue w-[300px] text-center">
+            <p className="text-blue-400 mb-4 font-semibold">
               Are you sure you want to delete this story?
             </p>
             <div className="flex justify-center gap-4">
               <button
-                className="px-4 py-2 bg-gray-600 rounded-lg text-white hover:bg-gray-500 cursor-pointer"
+                className="px-4 py-2 bg-gray-700 rounded-lg text-blue-400 hover:bg-gray-600 cursor-pointer"
                 onClick={() => setShowDeleteModal(false)}
               >
                 Cancel

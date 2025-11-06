@@ -14,7 +14,12 @@ function ForgotPassword() {
     newPassword: "",
     confirmNewPassword: "",
   });
-  const [inputClick, setInputClick] = useState({ email: false, otp: false });
+  const [inputClick, setInputClick] = useState({
+    email: false,
+    otp: false,
+    newPassword: false,
+    confirmNewPassword: false,
+  });
   const [loading, setLoading] = useState(false);
 
   const handleFocus = (field) => {
@@ -32,78 +37,77 @@ function ForgotPassword() {
     setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
-const handleSendOtp = async () => {
-  setLoading(true);
-  setError(""); 
-  try {
-    const result = await axios.post(
-      `${serverUrl}/api/auth/sendotp`,
-      { email: formData.email },
-      { withCredentials: true }
-    );
-    console.log(result.data);
-    setStep(2);
-  } catch (error) {
-    setError(error.response?.data?.message || "Failed to send OTP");
-  } finally {
-    setLoading(false);
-  }
-};
+  const handleSendOtp = async () => {
+    setLoading(true);
+    setError("");
+    try {
+      const result = await axios.post(
+        `${serverUrl}/api/auth/sendotp`,
+        { email: formData.email },
+        { withCredentials: true }
+      );
+      console.log(result.data);
+      setStep(2);
+    } catch (error) {
+      setError(error.response?.data?.message || "Failed to send OTP");
+    } finally {
+      setLoading(false);
+    }
+  };
 
+  const handleVerifyOtp = async () => {
+    setLoading(true);
+    setError("");
+    try {
+      const result = await axios.post(`${serverUrl}/api/auth/verifyotp`, {
+        email: formData.email,
+        otp: formData.otp,
+      });
+      console.log(result.data);
+      setStep(3);
+    } catch (error) {
+      setError(error.response?.data?.message || "Invalid OTP");
+    } finally {
+      setLoading(false);
+    }
+  };
 
-const handleVerifyOtp = async () => {
-  setLoading(true);
-  setError("");
-  try {
-    const result = await axios.post(`${serverUrl}/api/auth/verifyotp`, {
-      email: formData.email,
-      otp: formData.otp,
-    });
-    console.log(result.data);
-    setStep(3);
-  } catch (error) {
-    setError(error.response?.data?.message || "Invalid OTP");
-  } finally {
-    setLoading(false);
-  }
-};
+  const handleResetPassword = async () => {
+    if (formData.newPassword !== formData.confirmNewPassword) {
+      return setError("Passwords do not match");
+    }
+    if (formData.newPassword.length < 6) {
+      return setError("Password must be at least 6 characters");
+    }
 
-
-const handleResetPassword = async () => {
-  if (formData.newPassword !== formData.confirmNewPassword) {
-    return setError("Passwords do not match");
-  }
-  if (formData.newPassword.length < 6) {
-    return setError("Password must be at least 6 characters");
-  }
-
-  setLoading(true);
-  setError("");
-  try {
-    const result = await axios.post(`${serverUrl}/api/auth/resetpassword`, {
-      email: formData.email,
-      password: formData.newPassword,
-    });
-    console.log(result.data);
-    alert("Password reset successful! Redirecting to login...");
-
-    setTimeout(() => {
-        navigate("/signin");  // <-- Redirect to login page
+    setLoading(true);
+    setError("");
+    try {
+      const result = await axios.post(`${serverUrl}/api/auth/resetpassword`, {
+        email: formData.email,
+        password: formData.newPassword,
+      });
+      console.log(result.data);
+      alert("Password reset successful! Redirecting to login...");
+      setTimeout(() => {
+        navigate("/signin");
       }, 2000);
-
-  } catch (error) {
-    setError(error.response?.data?.message || "Failed to reset password");
-  } finally {
-    setLoading(false);
-  }
-};
+    } catch (error) {
+      setError(error.response?.data?.message || "Failed to reset password");
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const renderInput = (field, label, type = "text") => (
     <div className="relative w-[90%] h-[50px]">
       <label
         htmlFor={field}
-        className={`absolute left-4 transition-all duration-200 bg-white px-1 text-[15px] text-gray-700 pointer-events-none
-        ${inputClick[field] || formData[field] ? "top-[-10px] text-sm text-black" : "top-[14px]"}`}
+        className={`absolute left-4 transition-all duration-200 px-1
+          ${inputClick[field] || formData[field]
+            ? "top-[-10px] text-sm text-blue-400"
+            : "top-[14px] text-gray-400"
+          }`}
       >
         {label}
       </label>
@@ -115,27 +119,37 @@ const handleResetPassword = async () => {
         onFocus={() => handleFocus(field)}
         onBlur={() => handleBlur(field)}
         onChange={handleChange}
-        className="w-full h-full border-2 border-black rounded-2xl px-4 pt-0 outline-none"
+        className="w-full h-full border-2 border-blue-500 rounded-2xl px-4 pt-0 outline-none text-white bg-[#0A0F1C] focus:border-blue-400 focus:shadow-[0_0_10px_rgba(37,99,235,0.7)] transition-all"
         required
       />
     </div>
   );
 
   return (
-    <div className="w-full h-screen bg-gradient-to-b from-black to-gray-900 flex flex-col justify-center items-center">
-      <div className="w-[90%] max-w-[500px] h-[500px] bg-white rounded-2xl flex justify-center items-center flex-col border-2 border-[#1a1f23] gap-6">
-        <h2 className="text-[30px] font-semibold">Forgot Password</h2>
+    <div className="w-full min-h-screen bg-gradient-to-b from-black to-gray-900 flex flex-col justify-center items-center p-4">
+      <div className="w-[90%] max-w-[500px] bg-[#0A0F1C] rounded-2xl flex flex-col items-center gap-6 p-6 shadow-[0_0_25px_rgba(37,99,235,0.5)] border border-blue-500">
+        <h2 className="text-[28px] font-bold text-blue-400 tracking-wide">
+          Forgot Password
+        </h2>
 
         {step === 1 && (
           <>
             {renderInput("email", "Enter your email", "email")}
             <button
-              className="w-[90%] h-[50px] bg-black text-white font-semibold rounded-2xl"
               onClick={handleSendOtp}
               disabled={loading}
+              className="w-[90%] h-[50px] bg-blue-500 hover:bg-blue-600 text-white font-semibold rounded-2xl shadow-[0_0_15px_rgba(37,99,235,0.7)] hover:shadow-[0_0_25px_rgba(37,99,235,0.9)] transition-all flex items-center justify-center"
             >
               {loading ? <ClipLoader size={25} color="#ffffff" /> : "Send OTP"}
             </button>
+
+            <p
+              className="text-gray-400 cursor-pointer mt-2"
+              onClick={() => navigate("/signin")}
+            >
+              Back to Sign In{" "}
+              <span className="underline text-blue-400 hover:text-blue-300">Sign In</span>
+            </p>
           </>
         )}
 
@@ -143,12 +157,21 @@ const handleResetPassword = async () => {
           <>
             {renderInput("otp", "Enter the OTP", "text")}
             <button
-              className="w-[90%] h-[50px] bg-black text-white font-semibold rounded-2xl"
               onClick={handleVerifyOtp}
               disabled={loading}
+              className="w-[90%] h-[50px] bg-blue-500 hover:bg-blue-600 text-white font-semibold rounded-2xl shadow-[0_0_15px_rgba(37,99,235,0.7)] hover:shadow-[0_0_25px_rgba(37,99,235,0.9)] transition-all flex items-center justify-center"
             >
               {loading ? <ClipLoader size={25} color="#ffffff" /> : "Verify OTP"}
             </button>
+
+            <p
+              className="text-gray-400 cursor-pointer mt-2"
+              onClick={() => navigate("/signin")}
+            >
+              Back to Sign In{" "}
+              <span className="underline text-blue-400 hover:text-blue-300">Sign In</span>
+            </p>
+
           </>
         )}
 
@@ -157,19 +180,27 @@ const handleResetPassword = async () => {
             {renderInput("newPassword", "New Password", "password")}
             {renderInput("confirmNewPassword", "Confirm New Password", "password")}
             <button
-              className="w-[90%] h-[50px] bg-black text-white font-semibold rounded-2xl"
               onClick={handleResetPassword}
               disabled={loading}
+              className="w-[90%] h-[50px] bg-blue-500 hover:bg-blue-600 text-white font-semibold rounded-2xl shadow-[0_0_15px_rgba(37,99,235,0.7)] hover:shadow-[0_0_25px_rgba(37,99,235,0.9)] transition-all flex items-center justify-center"
             >
               {loading ? <ClipLoader size={25} color="#ffffff" /> : "Reset Password"}
             </button>
+
+            <p
+              className="text-gray-400 cursor-pointer mt-2"
+              onClick={() => navigate("/signin")}
+            >
+              Back to Sign In{" "}
+              <span className="underline text-blue-400 hover:text-blue-300">Sign In</span>
+            </p>
           </>
         )}
-        <div className="h-[5px] w-[90%] text-center">
-            {err && <p className="text-red-500 text-lg font-medium">{err}</p>}
-          </div>
+
+        {err && (
+          <p className="text-red-500 text-center font-medium">{err}</p>
+        )}
       </div>
-      
     </div>
   );
 }

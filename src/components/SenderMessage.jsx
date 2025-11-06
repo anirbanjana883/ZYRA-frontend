@@ -13,9 +13,10 @@ function SenderMessage({ message }) {
   return (
     <div
       ref={scroll}
-      className='w-fit max-w-[60%] bg-gradient-to-r from-fuchsia-500 via-purple-600 to-indigo-600 rounded-t-2xl
-      rounded-bl-2xl rounded-br-0 px-[12px] py-[10px] relative ml-auto right-0 flex flex-col gap-[10px] shadow-lg'>
-      
+      className='w-fit max-w-[60%] bg-gradient-to-r from-purple-500 via-fuchsia-500 to-pink-500
+        rounded-t-2xl rounded-bl-2xl rounded-br-0 px-4 py-3 relative ml-auto right-0 flex flex-col gap-2
+        shadow-[0_0_20px_rgba(255,0,255,0.5)] hover:scale-[1.02] transition-transform duration-200 mb-10'>
+
       {message?.image && (
         <img 
           src={message.image} 
@@ -25,20 +26,19 @@ function SenderMessage({ message }) {
       )}
 
       {message?.message && (
-        <div className='text-[16px] text-white break-words leading-relaxed'>
+        <div className='text-white text-[16px] font-medium break-words leading-relaxed drop-shadow-md'>
           {message.message}
         </div>
       )}
       
-      {/*  timestamp */}
+      {/* Timestamp */}
       <div className="text-[11px] text-gray-200 ml-auto">
         {dayjs(message?.createdAt).format("h:mm A")}
       </div>
       
-      {/* sender image */}
-      <div className='w-[30px] h-[30px] rounded-full cursor-pointer overflow-hidden absolute right-[-25px] bottom-[-35px] ring-2 ring-white/30'>
-        <img src={userData.profileImage} alt="" 
-        className='w-full h-full object-cover'/>
+      {/* Sender profile image */}
+      <div className='w-[30px] h-[30px] rounded-full cursor-pointer overflow-hidden absolute right-[-25px] bottom-[-35px] ring-2 ring-pink-400/50'>
+        <img src={userData.profileImage} alt="" className='w-full h-full object-cover'/>
       </div>
     </div>
   )

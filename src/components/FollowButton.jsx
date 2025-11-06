@@ -34,8 +34,20 @@ function FollowButton({ targetUserId, tailwind, onfollowChange }) {
   };
 
   return (
-    <button className={tailwind} onClick={handleFollow}>
-      {isFollowing ? "Following" : "Follow"}
+    <button
+      onClick={handleFollow}
+      disabled={loading}
+      className={`
+        ${tailwind} 
+        px-5 py-2 rounded-full font-semibold transition-all duration-300
+        ${isFollowing 
+          ? "bg-gradient-to-r from-purple-600 via-pink-500 to-red-500 text-white shadow-md shadow-pink-400/50 hover:scale-105" 
+          : "bg-gradient-to-r from-cyan-500 via-blue-500 to-indigo-500 text-white shadow-md shadow-cyan-400/50 hover:scale-105"}
+        ${loading ? "opacity-70 cursor-not-allowed" : ""}
+      `}
+      style={{ textShadow: "0 0 2px rgba(255,255,255,0.6)" }}
+    >
+      {loading ? "..." : isFollowing ? "Following" : "Follow"}
     </button>
   );
 }

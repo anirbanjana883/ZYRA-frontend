@@ -10,7 +10,7 @@ import { useNavigate } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import { GoHeart, GoHeartFill } from "react-icons/go";
 import { MdOutlineComment } from "react-icons/md";
-import { setLoopData } from "../redux/loopSlice";
+import { setLoopData, toggleMute } from "../redux/loopSlice";
 import axios from "axios";
 import { serverUrl } from "../App";
 import { BiSend } from "react-icons/bi";
@@ -21,7 +21,7 @@ function LoopCard({ loop }) {
   const commentRef = useRef();
 
   const [isPlaying, setIsPlaying] = useState(true);
-  const [isMute, setIsMute] = useState(true);
+  const { isMute } = useSelector((state) => state.loop); // GLOBAL
   const [progress, setProgress] = useState(0);
 
   const [showHeart, setShowHeart] = useState(false);
@@ -58,11 +58,9 @@ function LoopCard({ loop }) {
     }
   };
 
-  const toggleMute = () => {
-    const newMuteState = !isMute;
-    setIsMute(newMuteState);
-    if (videoRef.current) videoRef.current.muted = newMuteState;
-  };
+  const handleMuteToggle = () => {
+  dispatch(toggleMute());
+};
 
   useEffect(() => {
     const observer = new IntersectionObserver(
@@ -267,166 +265,161 @@ function LoopCard({ loop }) {
 
       {/* COMMENT MODAL */}
       <div
-        ref={commentRef}
-        className={`absolute z-[200] bottom-0 w-full h-[500px] p-[10px] rounded-t-3xl bg-[#0e1718]
-        transition-transform duration-500 ease-in-out shadow-2xl shadow-black
-        left-0 ${showComment ? "translate-y-0" : "translate-y-[100%]"}`}
+  ref={commentRef}
+  className={`absolute z-[200] bottom-0 w-full max-w-[480px] mx-auto h-[500px] p-4 rounded-t-3xl 
+    bg-gradient-to-t from-[#0e1718] via-[#0b1012] to-[#141e25] 
+    transition-transform duration-500 ease-in-out shadow-2xl shadow-cyan-800/60
+    left-0 ${showComment ? "translate-y-0" : "translate-y-[100%]"}`}
+>
+  <h1 className="text-white text-[22px] text-center font-bold tracking-wide drop-shadow-md">
+    Comments
+  </h1>
+
+  {/* COMMENTS LIST */}
+  <div className="w-full h-[350px] overflow-y-auto flex flex-col gap-4 px-2 mt-2 scrollbar-thin scrollbar-thumb-cyan-500/60 scrollbar-track-gray-900/20">
+    {loop.comments.length === 0 && (
+      <div className="text-center text-gray-400 text-[18px] font-medium mt-[50px]">
+        No Comments Yet
+      </div>
+    )}
+
+    {loop.comments?.map((com) => (
+      <div
+        key={com._id}
+        className="flex flex-col gap-1 border-b border-gray-800 pb-3"
       >
-        <h1 className="text-white text-[20px] text-center font-semibold">
-          Comments
-        </h1>
-
-        {/* COMMENTS LIST */}
-        <div className="w-full h-[350px] overflow-y-auto flex flex-col gap-[15px] px-2">
-          {loop.comments.length === 0 && (
-            <div className="text-center text-gray-300 text-[18px] font-medium mt-[50px]">
-              No Comments Yet
+        {/* Comment Header */}
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <div className="w-8 h-8 md:w-10 md:h-10 rounded-full overflow-hidden border-2 border-cyan-600">
+              <img
+                src={com.author?.profileImage || dp}
+                alt="profile"
+                className="w-full h-full object-cover"
+              />
             </div>
-          )}
+            <div className="text-white font-semibold text-sm md:text-base truncate">
+              {com.author?.userName || "Unknown User"}
+            </div>
+          </div>
 
-          {loop.comments?.map((com) => (
-            <div
-              key={com._id}
-              className="flex flex-col gap-[5px] border-b border-gray-800 pb-3"
+          {/* DELETE COMMENT BUTTON */}
+          {(com.author._id === userData._id ||
+            loop.author._id === userData._id) && (
+            <button
+              onClick={() => handleDeleteComment(com._id)}
+              className="text-red-500 text-xs hover:text-red-400 transition-all"
             >
-              {/* Comment Header */}
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-3">
-                  <div className="w-8 h-8 md:w-10 md:h-10 rounded-full overflow-hidden border-2 border-gray-700">
-                    <img
-                      src={com.author?.profileImage || dp}
-                      alt="profile"
-                      className="w-full h-full object-cover"
-                    />
-                  </div>
-                  <div className="text-white font-semibold text-sm md:text-base truncate">
-                    {com.author?.userName || "Unknown User"}
-                  </div>
+              Delete
+            </button>
+          )}
+        </div>
+
+        {/* Comment Message */}
+        <div className="text-gray-300 text-sm pl-12 md:pl-14">
+          {com.message}
+        </div>
+
+        {/* Replies */}
+        <div className="pl-12 flex flex-col gap-2 mt-1">
+          {com.replies?.map((rep) => (
+            <div
+              key={rep._id}
+              className="flex justify-between items-start bg-gray-900/70 px-2 py-1 rounded-lg backdrop-blur-sm"
+            >
+              <div className="flex items-start gap-2 text-gray-300 text-sm">
+                <div className="w-7 h-7 rounded-full overflow-hidden border-2 border-cyan-600 flex-shrink-0">
+                  <img
+                    src={rep.author?.profileImage || dp}
+                    alt="profile"
+                    className="w-full h-full object-cover"
+                  />
                 </div>
-
-                {/* DELETE COMMENT BUTTON ✨ */}
-                {(com.author._id === userData._id ||
-                  loop.author._id === userData._id) && (
-                  <button
-                    onClick={() => handleDeleteComment(com._id)}
-                    className="text-red-500 text-xs hover:text-red-400 transition"
-                  >
-                    Delete
-                  </button>
-                )}
+                <div>
+                  <span className="font-semibold text-white mr-1">
+                    {rep.author?.userName}:
+                  </span>
+                  {rep.message}
+                </div>
               </div>
 
-              {/* Comment Message ✨ */}
-              <div className="text-gray-300 text-sm pl-12 md:pl-14">
-                {com.message}
-              </div>
-
-              {/* Replies ✨ */}
-              <div className="pl-12 flex flex-col gap-2 mt-1">
-                {com.replies?.map((rep) => (
-                  <div
-                    key={rep._id}
-                    className="flex justify-between items-start bg-gray-900 px-2 py-1 rounded-lg"
-                  >
-                    {/* Left side: profile + message */}
-                    <div className="flex items-start gap-2 text-gray-300 text-sm">
-                      {/* Small profile image */}
-                      <div className="w-7 h-7 rounded-full overflow-hidden border-2 border-gray-700 flex-shrink-0">
-                        <img
-                          src={rep.author?.profileImage || dp} // show author's image, not userData
-                          alt="profile"
-                          className="w-full h-full object-cover"
-                        />
-                      </div>
-                      {/* Message */}
-                      <div>
-                        <span className="font-semibold text-white mr-1">
-                          {rep.author?.userName}:
-                        </span>
-                        {rep.message}
-                      </div>
-                    </div>
-
-                    {/* Delete button */}
-                    {(rep.author._id === userData._id ||
-                      loop.author._id === userData._id) && (
-                      <button
-                        onClick={() => handleDeleteReply(com._id, rep._id)}
-                        className="text-red-500 text-xs hover:text-red-400 transition"
-                      >
-                        Delete
-                      </button>
-                    )}
-                  </div>
-                ))}
-
-                {/* Reply Input ✨ */}
-                {replyInputId === com._id && (
-                  <div className="flex gap-2 mt-2 items-center">
-                    {/* Small author profile image ✨ */}
-                    <div className="w-7 h-7 rounded-full overflow-hidden border-2 border-gray-700">
-                      <img
-                        src={userData?.profileImage || dp}
-                        alt="profile"
-                        className="w-full h-full object-cover"
-                      />
-                    </div>
-
-                    <input
-                      type="text"
-                      placeholder="Write a reply..."
-                      className="w-full px-2 py-1 rounded-md outline-none text-gray-400 bg-gray-800"
-                      value={replyMessage}
-                      onChange={(e) => setReplyMessage(e.target.value)}
-                    />
-                    {/* send button */}
-                    <button
-                      onClick={() => handleReply(com._id)}
-                      className="bg-blue-500 text-white p-1 rounded-md hover:bg-blue-600 transition flex items-center justify-center cursor-pointer"
-                    >
-                      <BiSend size={16} />
-                    </button>
-                  </div>
-                )}
-
-                {/* Reply Button ✨ */}
+              {(rep.author._id === userData._id ||
+                loop.author._id === userData._id) && (
                 <button
-                  className="text-gray-400 text-xs hover:text-gray-200 mt-1"
-                  onClick={() =>
-                    setReplyInputId(replyInputId === com._id ? null : com._id)
-                  }
+                  onClick={() => handleDeleteReply(com._id, rep._id)}
+                  className="text-red-500 text-xs hover:text-red-400 transition-all"
                 >
-                  Reply
+                  Delete
                 </button>
-              </div>
+              )}
             </div>
           ))}
-        </div>
 
-        {/* COMMENT INPUT */}
-        <div className="w-full h-[80px] flex fixed bottom-0 items-center justify-between py-[50px] px-[20px]">
-          <div className="w-10 h-10 md:w-12 md:h-12 border-2 border-black rounded-full overflow-hidden">
-            <img
-              src={userData?.profileImage || dp}
-              alt="profile"
-              className="w-full h-full object-cover"
-            />
-          </div>
-          <input
-            type="text"
-            className="px-[10px] border-b-2 border-b-gray-500 w-[90%] outline-none h-[40px] text-white"
-            placeholder="Write comments..."
-            value={message}
-            onChange={(e) => setMessage(e.target.value)}
-          />
-          {message.trim() && (
-            <IoSend
-              onClick={handleComment}
-              className="w-[25px] h-[25px] text-white cursor-pointer"
-            />
+          {/* Reply Input */}
+          {replyInputId === com._id && (
+            <div className="flex gap-2 mt-2 items-center">
+              <div className="w-7 h-7 rounded-full overflow-hidden border-2 border-cyan-600">
+                <img
+                  src={userData?.profileImage || dp}
+                  alt="profile"
+                  className="w-full h-full object-cover"
+                />
+              </div>
+
+              <input
+                type="text"
+                placeholder="Write a reply..."
+                className="w-full px-2 py-1 rounded-md outline-none text-gray-300 bg-gray-800/70 placeholder-gray-400 backdrop-blur-sm"
+                value={replyMessage}
+                onChange={(e) => setReplyMessage(e.target.value)}
+              />
+              <button
+                onClick={() => handleReply(com._id)}
+                className="bg-cyan-500 text-white p-1 rounded-md hover:bg-cyan-600 transition flex items-center justify-center cursor-pointer"
+              >
+                <BiSend size={16} />
+              </button>
+            </div>
           )}
+
+          {/* Reply Button */}
+          <button
+            className="text-gray-400 text-xs hover:text-cyan-400 mt-1 transition-colors"
+            onClick={() =>
+              setReplyInputId(replyInputId === com._id ? null : com._id)
+            }
+          >
+            Reply
+          </button>
         </div>
       </div>
+    ))}
+  </div>
+
+  {/* COMMENT INPUT */}
+  <div className="w-full h-[80px] flex fixed bottom-0 items-center justify-between py-4 px-4 bg-gradient-to-t from-[#0e1718] via-[#0b1012] to-[#141e25] backdrop-blur-md border-t border-cyan-700/50">
+    <div className="w-10 h-10 md:w-12 md:h-12 border-2 border-cyan-600 rounded-full overflow-hidden">
+      <img
+        src={userData?.profileImage || dp}
+        alt="profile"
+        className="w-full h-full object-cover"
+      />
+    </div>
+    <input
+      type="text"
+      className="px-3 border-b-2 border-cyan-500 w-[85%] outline-none h-[40px] text-white placeholder-gray-400 bg-gray-900/70 backdrop-blur-sm rounded-md"
+      placeholder="Write a comment..."
+      value={message}
+      onChange={(e) => setMessage(e.target.value)}
+    />
+    {message.trim() && (
+      <IoSend
+        onClick={handleComment}
+        className="w-[25px] h-[25px] text-cyan-400 cursor-pointer hover:text-cyan-500 transition-colors"
+      />
+    )}
+  </div>
+</div>
 
       {/* VIDEO */}
       <video
@@ -456,7 +449,7 @@ function LoopCard({ loop }) {
       {/* MUTE/UNMUTE */}
       <div
         className="absolute top-[34px] right-[20px]  text-white bg-black/50 p-2 rounded-full cursor-pointer z-100"
-        onClick={toggleMute}
+        onClick={handleMuteToggle} 
       >
         {isMute ? (
           <IoVolumeMuteOutline size={25} />
@@ -465,108 +458,110 @@ function LoopCard({ loop }) {
         )}
       </div>
 
-      {/* USER INFO */}
-      <div className="w-full absolute h-[100px] bottom-[10px] px-[10px] flex flex-col gap-[10px]">
-        <div className="flex items-center gap-4">
-          <div
-            className="w-15 h-15 md:w-14 md:h-14 border-5 border-black rounded-full overflow-hidden cursor-pointer"
-            onClick={() =>
-              loop.author?.userName &&
-              navigate(`/profile/${loop.author.userName}`)
-            }
-          >
-            <img
-              src={loop.author?.profileImage || dp}
-              alt="profile"
-              className="w-full h-full object-cover"
-            />
-          </div>
-          <div className="max-w-[200px] font-semibold text-white truncate">
-            {loop.author?.userName || "Unknown User"}
-          </div>
+{/* USER INFO */}
+<div className="w-full absolute bottom-[10px] px-4 flex flex-col gap-2 max-w-[480px] mx-auto">
+  <div className="flex items-center gap-3 bg-black/50 backdrop-blur-md p-2 rounded-2xl shadow-lg shadow-cyan-800/50">
+    {/* Profile */}
+    <div
+      className="w-14 h-14 md:w-14 md:h-14 border-2 border-cyan-500 rounded-full overflow-hidden cursor-pointer"
+      onClick={() =>
+        loop.author?.userName && navigate(`/profile/${loop.author.userName}`)
+      }
+    >
+      <img
+        src={loop.author?.profileImage || dp}
+        alt="profile"
+        className="w-full h-full object-cover"
+      />
+    </div>
 
-          {userData &&
-            authorId &&
-            String(userData._id) !== String(authorId) && (
-              <FollowButton
-                targetUserId={authorId}
-                tailwind="px-[10px] py-[5px] text-white border-2 text-[14px] rounded-2xl border-white cursor-pointer relative z-[50]"
-              />
-            )}
+    {/* Username */}
+    <div className="max-w-[180px] font-semibold text-white text-sm md:text-base truncate drop-shadow-md">
+      {loop.author?.userName || "Unknown User"}
+    </div>
 
-          {/* Loop Owner Options (3-dot Menu) */}
-          {String(userData._id) === String(authorId) && (
-            <div className="relative">
-              <button
-                className="text-white text-2xl px-2 cursor-pointer"
-                onClick={() => setShowDeleteModal(true)}
-              >
-                <BsThreeDotsVertical />
-              </button>
-            </div>
-          )}
-        </div>
-
-        <div className="text-white px-[10px]">{loop.caption}</div>
-
-        {/* LIKE & COMMENT ICONS */}
-        <div className="absolute right-0 flex flex-col gap-[20px] text-white bottom-[180px] justify-center px-[10px] ">
-          <div className="flex flex-col items-center cursor-pointer">
-            {!likedByUser ? (
-              <GoHeart
-                onClick={handleLike}
-                className="w-[30px] cursor-pointer h-[30px]"
-              />
-            ) : (
-              <GoHeartFill
-                onClick={handleLike}
-                className="w-[30px] cursor-pointer h-[30px] text-red-600"
-              />
-            )}
-            <div>{loop.likes?.length || 0}</div>
-          </div>
-
-          <div
-            className="flex flex-col items-center cursor-pointer"
-            onClick={() => setShowComment(true)}
-          >
-            <MdOutlineComment className="w-[30px] cursor-pointer h-[30px]" />
-            <div>{loop.comments?.length || 0}</div>
-          </div>
-        </div>
-      </div>
-
-      {/* Delete confirmation modal */}
-
-      {showDeleteModal && (
-        <div
-          className="fixed inset-0 flex items-center justify-center bg-transparent z-[999]"
-          onClick={(e) => {
-            // Close only if clicked outside the modal box
-            if (e.target === e.currentTarget) {
-              setShowDeleteModal(false);
-            }
-          }}
-        >
-          <div className="bg-white p-6 rounded-lg shadow-lg w-[300px] text-center">
-            <p className="mb-4 font-semibold">Delete this loop?</p>
-            <div className="flex justify-around">
-              <button
-                onClick={() => setShowDeleteModal(false)}
-                className="px-4 py-1 rounded bg-gray-200 hover:bg-gray-300 cursor-pointer"
-              >
-                Cancel
-              </button>
-              <button
-                onClick={handleDeleteLoop}
-                className="px-4 py-1 rounded bg-red-500 text-white hover:bg-red-600 cursor-pointer"
-              >
-                Delete
-              </button>
-            </div>
-          </div>
-        </div>
+    {/* Follow Button */}
+    {userData &&
+      authorId &&
+      String(userData._id) !== String(authorId) && (
+        <FollowButton
+          targetUserId={authorId}
+          tailwind="px-3 py-1 text-white border-2 border-cyan-500 text-[14px] rounded-2xl hover:bg-cyan-500/20 transition relative z-[50]"
+        />
       )}
+
+    {/* Loop Owner Options (3-dot Menu) */}
+    {String(userData._id) === String(authorId) && (
+      <div className="relative ml-auto">
+        <button
+          className="text-white text-2xl px-2 cursor-pointer hover:text-cyan-400 transition-colors"
+          onClick={() => setShowDeleteModal(true)}
+        >
+          <BsThreeDotsVertical />
+        </button>
+      </div>
+    )}
+  </div>
+
+  {/* Caption */}
+  <div className="text-white px-3 py-1 bg-black/50 backdrop-blur-sm rounded-xl text-sm md:text-base shadow-md shadow-cyan-800/50 break-words">
+    {loop.caption}
+  </div>
+
+  {/* LIKE & COMMENT ICONS */}
+  <div className="absolute right-0 flex flex-col gap-5 text-white bottom-[180px] justify-center px-[10px]">
+    <div className="flex flex-col items-center cursor-pointer hover:scale-110 transition-transform duration-200">
+      {!likedByUser ? (
+        <GoHeart onClick={handleLike} className="w-8 h-8" />
+      ) : (
+        <GoHeartFill
+          onClick={handleLike}
+          className="w-8 h-8 text-red-500 drop-shadow-lg"
+        />
+      )}
+      <div className="text-sm drop-shadow-md">{loop.likes?.length || 0}</div>
+    </div>
+
+    <div
+      className="flex flex-col items-center cursor-pointer hover:scale-110 transition-transform duration-200"
+      onClick={() => setShowComment(true)}
+    >
+      <MdOutlineComment className="w-8 h-8" />
+      <div className="text-sm drop-shadow-md">{loop.comments?.length || 0}</div>
+    </div>
+  </div>
+</div>
+
+{/* Delete confirmation modal */}
+{showDeleteModal && (
+  <div
+    className="fixed inset-0 flex items-center justify-center bg-black/50 backdrop-blur-sm z-[999]"
+    onClick={(e) => {
+      if (e.target === e.currentTarget) setShowDeleteModal(false);
+    }}
+  >
+    <div className="bg-gray-900 p-6 rounded-xl shadow-lg w-[320px] text-center border-2 border-cyan-500">
+      <p className="mb-4 font-semibold text-white text-lg">
+        Delete this loop?
+      </p>
+      <div className="flex justify-around">
+        <button
+          onClick={() => setShowDeleteModal(false)}
+          className="px-4 py-2 rounded bg-gray-700 text-white hover:bg-gray-600 transition"
+        >
+          Cancel
+        </button>
+        <button
+          onClick={handleDeleteLoop}
+          className="px-4 py-2 rounded bg-red-600 text-white hover:bg-red-700 transition"
+        >
+          Delete
+        </button>
+      </div>
+    </div>
+  </div>
+)}
+
 
     </div>
   );

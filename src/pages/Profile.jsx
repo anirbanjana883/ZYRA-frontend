@@ -1,26 +1,24 @@
 import React, { useEffect, useState } from "react";
 import { serverUrl } from "../App";
 import axios from "axios";
-import { useParams } from "react-router-dom";
+import { useParams, useNavigate } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import { setProfileData, setUserData } from "../redux/userSlice";
 import { IoArrowBack } from "react-icons/io5";
 import dp from "../assets/dp.png";
 import Nav from "../components/Nav";
-import { useNavigate } from "react-router-dom";
 import FollowButton from "../components/FollowButton";
 import Post from "../components/Post";
 import { setSelectedUser } from "../redux/messageSlice";
-import OtherUser from "../components/OtherUser"; 
+import OtherUser from "../components/OtherUser";
 
 function Profile() {
   const { userName } = useParams();
   const dispatch = useDispatch();
   const { profileData, userData } = useSelector((state) => state.user);
   const { postData } = useSelector((state) => state.post);
-
   const [postType, setPostType] = useState("");
-  const [suggestedUser, setSuggestedUser] = useState([]); 
+  const [suggestedUser, setSuggestedUser] = useState([]);
   const navigate = useNavigate();
 
   const handleProfile = async () => {
@@ -47,7 +45,6 @@ function Profile() {
     }
   };
 
-  // ✅ [CHANGE] Fetch suggested users
   const fetchSuggestedUsers = async () => {
     try {
       const result = await axios.get(`${serverUrl}/api/user/suggested`, {
@@ -70,20 +67,20 @@ function Profile() {
   }, [profileData, userData]);
 
   return (
-    <div className="w-full min-h-screen bg-black text-black">
+    <div className="w-full min-h-screen bg-[#030712] text-white font-inter">
       {/* Top bar */}
-      <div className="w-full h-[80px] flex justify-between items-center px-[30px] border-b border-gray-700">
+      <div className="w-full h-[80px] flex justify-between items-center px-[30px] border-b border-blue-500/40 bg-[#0A0F1C] shadow-[0_0_25px_rgba(37,99,235,0.3)]">
         <div onClick={() => navigate("/")}>
           <IoArrowBack
             size={30}
-            className="text-white cursor-pointer hover:text-gray-300"
+            className="text-blue-400 cursor-pointer hover:text-blue-300 hover:scale-110 transition-all duration-300"
           />
         </div>
-        <div className="font-semibold text-[20px]">
+        <div className="font-semibold text-[20px] text-blue-400">
           {profileData?.userName || "Profile"}
         </div>
         <div
-          className="font-semibold text-[20px] cursor-pointer text-red-500 hover:text-red-400 transition"
+          className="font-semibold text-[20px] cursor-pointer text-red-500 hover:text-red-400 transition-all duration-300"
           onClick={handleLogOut}
         >
           Log Out
@@ -91,8 +88,8 @@ function Profile() {
       </div>
 
       {/* Profile Image */}
-      <div className="w-full h-[150px] flex items-start gap-[20px] lg:gap-[50px] pt-[20px] px-[10px] justify-center">
-        <div className="w-[80px] h-[80px] md:w-[140px] md:h-[140px] border-4 border-white rounded-full cursor-pointer overflow-hidden shadow-md">
+      <div className="w-full flex flex-col md:flex-row items-center gap-[20px] lg:gap-[50px] pt-[20px] px-[10px] justify-center">
+        <div className="w-[80px] h-[80px] md:w-[140px] md:h-[140px] border-4 border-blue-500/50 rounded-full cursor-pointer overflow-hidden shadow-[0_0_20px_rgba(37,99,235,0.6)]">
           <img
             src={profileData?.profileImage || dp}
             alt="profile"
@@ -101,8 +98,8 @@ function Profile() {
         </div>
 
         {/* Profile details */}
-        <div>
-          <div className="font-semibold text-[22px] text-white">
+        <div className="text-center md:text-left">
+          <div className="font-semibold text-[22px] text-blue-400 drop-shadow-[0_0_8px_rgba(37,99,235,0.8)]">
             {profileData?.name}
           </div>
           <div className="text-[17px] text-gray-400 italic">
@@ -113,10 +110,10 @@ function Profile() {
       </div>
 
       {/* Stats Section */}
-      <div className="w-full h-[100px] flex items-center justify-center gap-[40px] md:gap-[60px] px-[20%] pt-[30px] text-white">
+      <div className="w-full flex flex-wrap justify-center items-center gap-[40px] md:gap-[60px] px-[5%] pt-[30px] text-white">
         {/* Posts */}
-        <div>
-          <div className="text-white text-[22px] md:text-[30px] font-semibold">
+        <div className="flex flex-col items-center p-4 bg-[#0A0F1C] border border-blue-500/40 rounded-xl shadow-[0_0_20px_rgba(37,99,235,0.3)] hover:shadow-[0_0_35px_rgba(37,99,235,0.5)] transition-all duration-300">
+          <div className="text-[22px] md:text-[30px] font-semibold text-blue-300">
             {
               postData.filter((post) => post.author?._id === profileData?._id)
                 .length
@@ -126,14 +123,14 @@ function Profile() {
         </div>
 
         {/* Followers */}
-        <div>
+        <div className="flex flex-col items-center p-4 bg-[#0A0F1C] border border-blue-500/40 rounded-xl shadow-[0_0_20px_rgba(37,99,235,0.3)] hover:shadow-[0_0_35px_rgba(37,99,235,0.5)] transition-all duration-300">
           <div className="flex items-center justify-center gap-[20px]">
             <div className="relative flex gap-[5px]">
               <div className="relative w-[60px] h-[30px]">
                 {profileData?.followers?.slice(0, 3).map((user, index) => (
                   <div
                     key={user?._id || index}
-                    className="w-[30px] h-[30px] border-2 border-white rounded-full overflow-hidden absolute shadow"
+                    className="w-[30px] h-[30px] border-2 border-blue-500 rounded-full overflow-hidden absolute shadow-[0_0_10px_rgba(37,99,235,0.7)]"
                     style={{ left: `${index * 9}px`, zIndex: 30 - index }}
                   >
                     <img
@@ -145,24 +142,22 @@ function Profile() {
                 ))}
               </div>
             </div>
-            <div className="text-white text-[22px] md:text-[30px] font-semibold">
+            <div className="text-[22px] md:text-[30px] font-semibold text-blue-300">
               {profileData?.followers?.length || 0}
             </div>
           </div>
-          <div className="text-[18px] md:text-[22px] text-gray-400">
-            Followers
-          </div>
+          <div className="text-[18px] md:text-[22px] text-gray-400">Followers</div>
         </div>
 
         {/* Following */}
-        <div>
+        <div className="flex flex-col items-center p-4 bg-[#0A0F1C] border border-blue-500/40 rounded-xl shadow-[0_0_20px_rgba(37,99,235,0.3)] hover:shadow-[0_0_35px_rgba(37,99,235,0.5)] transition-all duration-300">
           <div className="flex items-center justify-center gap-[20px]">
             <div className="relative flex gap-[5px]">
               <div className="relative w-[60px] h-[30px]">
                 {profileData?.following?.slice(0, 3).map((user, index) => (
                   <div
                     key={user?._id || index}
-                    className="w-[30px] h-[30px] border-2 border-white rounded-full overflow-hidden absolute shadow"
+                    className="w-[30px] h-[30px] border-2 border-blue-500 rounded-full overflow-hidden absolute shadow-[0_0_10px_rgba(37,99,235,0.7)]"
                     style={{ left: `${index * 9}px`, zIndex: 30 - index }}
                   >
                     <img
@@ -174,43 +169,35 @@ function Profile() {
                 ))}
               </div>
             </div>
-            <div className="text-white text-[22px] md:text-[30px] font-semibold">
+            <div className="text-[22px] md:text-[30px] font-semibold text-blue-300">
               {profileData?.following.length}
             </div>
           </div>
-          <div className="text-[18px] md:text-[22px] text-gray-400">
-            Following
-          </div>
+          <div className="text-[18px] md:text-[22px] text-gray-400">Following</div>
         </div>
       </div>
 
-      {/* button */}
-      <div className="w-full h-[80px] flex justify-center items-center gap-[20px] mt-[10px]">
-        {/* own profile */}
+      {/* Buttons */}
+      <div className="w-full flex justify-center items-center gap-[20px] mt-[10px] mb-6">
         {profileData?._id === userData?._id && (
           <button
-            className="px-[10px] min-w-[150px] py-[5px] h-[40px]
-      bg-white text-black font-semibold rounded-2xl shadow hover:bg-gray-200 transition duration-200 cursor-pointer"
+            className="px-[10px] min-w-[150px] py-[5px] h-[40px] bg-blue-500/20 border border-blue-500 rounded-2xl text-blue-300 font-semibold shadow hover:shadow-[0_0_15px_rgba(37,99,235,0.7)] hover:bg-blue-500/30 transition duration-200 cursor-pointer"
             onClick={() => navigate("/editprofile")}
           >
             Edit Profile
           </button>
         )}
 
-        {/* other's profile */}
         {profileData?._id !== userData?._id && (
           <>
             <FollowButton
-              tailwind={
-                "px-[10px] min-w-[150px] py-[5px] h-[40px] bg-white text-black font-semibold rounded-2xl shadow hover:bg-gray-200 transition duration-200 cursor-pointer"
-              }
+              tailwind="px-[10px] min-w-[150px] py-[5px] h-[40px] bg-blue-500/20 border border-blue-500 rounded-2xl text-blue-300 font-semibold shadow hover:shadow-[0_0_15px_rgba(37,99,235,0.7)] hover:bg-blue-500/30 transition duration-200 cursor-pointer"
               targetUserId={profileData?._id}
               onfollowChange={handleProfile}
             />
 
             <button
-              className="px-[10px] min-w-[150px] py-[5px] h-[40px] cursor-pointer
-      bg-white text-black font-semibold rounded-2xl shadow hover:bg-gray-200 transition duration-200"
+              className="px-[10px] min-w-[150px] py-[5px] h-[40px] bg-cyan-500/20 border border-cyan-500 rounded-2xl text-cyan-300 font-semibold shadow hover:shadow-[0_0_15px_rgba(6,182,212,0.7)] hover:bg-cyan-500/30 transition duration-200 cursor-pointer"
               onClick={() => {
                 dispatch(setSelectedUser(profileData));
                 navigate("/messageArea");
@@ -222,13 +209,13 @@ function Profile() {
         )}
       </div>
 
-            {/*  [CHANGE FIXED] Suggested Users - only for my profile */}
+      {/* Suggested Users */}
       {profileData?._id === userData?._id && suggestedUser.length > 0 && (
         <div className="px-4 py-3">
-          <h2 className="text-white text-lg font-semibold mb-2">
+          <h2 className="text-white text-lg font-semibold mb-2 drop-shadow-[0_0_6px_rgba(37,99,235,0.7)]">
             Suggested for you
           </h2>
-          <div className="flex gap-4 overflow-x-auto scrollbar-hide">
+          <div className="flex gap-4 overflow-x-auto scrollbar-thin scrollbar-thumb-blue-600/50 hover:scrollbar-thumb-blue-500/80">
             {suggestedUser.map((user) => (
               <OtherUser key={user._id} user={user} />
             ))}
@@ -236,19 +223,17 @@ function Profile() {
         </div>
       )}
 
-
-      {/* posts of own  */}
+      {/* Posts Section */}
       <div className="w-full min-h-[100vh] flex justify-center">
-        <div className="w-full max-w-[900px] flex flex-col items-center rounded-t-[30px] bg-white relative gap-[20px] pt-[30px] pb-[100px]">
-          {/* posts and saved post */}
-
+        <div className="w-full max-w-[900px] flex flex-col items-center rounded-t-[30px] bg-[#0A0F1C] relative gap-[20px] pt-[30px] pb-[100px] shadow-[0_0_30px_rgba(37,99,235,0.3)]">
+          {/* Post Type Toggle */}
           {profileData?._id == userData._id && (
-            <div className="w-[90%] max-w-[500px] h-[70px] bg-white rounded-full flex justify-center items-center gap-[10px]">
+            <div className="w-[90%] max-w-[500px] h-[70px] bg-[#030712] rounded-full flex justify-center items-center gap-[10px] border border-blue-500/40 shadow-[0_0_15px_rgba(37,99,235,0.5)]">
               <div
-                className={`w-[28%] h-[80%] flex justify-center items-center text-[19px] font-semibold rounded-full cursor-pointer ${
+                className={`w-[28%] h-[80%] flex justify-center items-center text-[19px] font-semibold rounded-full cursor-pointer transition-all duration-300 ${
                   postType === "posts"
-                    ? "bg-black text-white shadow-2xl shadow-black"
-                    : "hover:bg-black hover:text-white hover:shadow-2xl hover:shadow-black"
+                    ? "bg-blue-600 text-white shadow-[0_0_15px_rgba(37,99,235,0.8)]"
+                    : "text-blue-300 hover:bg-blue-500/30 hover:text-white"
                 }`}
                 onClick={() => setPostType("posts")}
               >
@@ -256,10 +241,10 @@ function Profile() {
               </div>
 
               <div
-                className={`w-[28%] h-[80%] flex justify-center items-center text-[19px] font-semibold rounded-full cursor-pointer ${
+                className={`w-[28%] h-[80%] flex justify-center items-center text-[19px] font-semibold rounded-full cursor-pointer transition-all duration-300 ${
                   postType === "saved"
-                    ? "bg-black text-white shadow-2xl shadow-black"
-                    : "hover:bg-black hover:text-white hover:shadow-2xl hover:shadow-black"
+                    ? "bg-blue-600 text-white shadow-[0_0_15px_rgba(37,99,235,0.8)]"
+                    : "text-blue-300 hover:bg-blue-500/30 hover:text-white"
                 }`}
                 onClick={() => setPostType("saved")}
               >
@@ -268,36 +253,27 @@ function Profile() {
             </div>
           )}
 
-          {/* navigation bar */}
+          {/* Navigation */}
           <Nav />
 
-          {/* for own profile both post and saved post will be visible  */}
-          {profileData?._id == userData._id && (
+          {/* Posts Rendering */}
+          {profileData?._id == userData._id ? (
             <>
-              {/* posts */}
               {postType === "posts" &&
                 postData.map(
-                  (post, index) =>
-                    post.author?._id === profileData?._id && (
-                      <Post key={post._id} post={post} />
-                    )
+                  (post) =>
+                    post.author?._id === profileData?._id && <Post key={post._id} post={post} />
                 )}
 
               {postType === "saved" &&
-                userData.saved.map((post, index) => (
-                  <Post key={index} post={post} />
-                ))}
+                userData.saved.map((post, index) => <Post key={index} post={post} />)}
             </>
-          )}
-
-          {/* for others only posts will be visible */}
-          {profileData?._id != userData._id &&
+          ) : (
             postData.map(
-              (post, index) =>
-                post.author?._id === profileData?._id && (
-                  <Post key={post._id} post={post} />
-                )
-            )}
+              (post) =>
+                post.author?._id === profileData?._id && <Post key={post._id} post={post} />
+            )
+          )}
         </div>
       </div>
     </div>

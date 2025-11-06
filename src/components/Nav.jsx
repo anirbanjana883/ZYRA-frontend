@@ -12,21 +12,56 @@ function Nav() {
   const { userData } = useSelector(state => state.user);
 
   return (
-    <div className='w-[90%] lg:w-[40%] h-[70px] bg-black flex justify-around items-center fixed bottom-[20px] rounded-full shadow-2xl shadow-[#000000] z-[100]'>
-      {/* home */}
-      <div className="text-white text-[22px] cursor-pointer hover:text-gray-300 transition"
-      onClick={() => navigate("/")}
-      ><TbHomeFilled /></div>
-      {/* search */}
-      <div className="text-white text-[22px] cursor-pointer hover:text-gray-300 transition" onClick={()=>navigate("/search")}><FaSearch /></div>
-      {/* upload */}
-      <div className="text-white text-[22px] cursor-pointer hover:text-gray-300 transition" onClick={()=>navigate("/upload")}><FaRegSquarePlus /></div>
-      {/* reels */}
-      <div className="text-white text-[22px] cursor-pointer hover:text-gray-300 transition" onClick={()=>navigate("/loops")}><BsCameraReelsFill /></div>
-      {/* profile */}
+    <div className='
+      w-[90%] lg:w-[40%] h-[70px] 
+      fixed bottom-[20px] flex justify-around items-center 
+      rounded-full border border-blue-400/40
+      bg-black/30 backdrop-blur-xl 
+      shadow-lg shadow-blue-600/40
+      z-[100]
+    '>
+      {/* Home */}
+      <div 
+        className="text-[#00ffff] hover:text-[#ff00ff] text-[26px] cursor-pointer transition duration-300"
+        onClick={() => navigate("/")}
+        title="Home"
+      >
+        <TbHomeFilled />
+      </div>
+
+      {/* Search */}
+      <div 
+        className="text-[#00ffea] hover:text-[#ff6fff] text-[26px] cursor-pointer transition duration-300"
+        onClick={() => navigate("/search")}
+        title="Search"
+      >
+        <FaSearch />
+      </div>
+
+      {/* Upload */}
+      <div 
+        className="text-[#00bfff] hover:text-[#ff00aa] text-[26px] cursor-pointer transition duration-300"
+        onClick={() => navigate("/upload")}
+        title="Upload"
+      >
+        <FaRegSquarePlus />
+      </div>
+
+      {/* Reels */}
+      <div 
+        className="text-[#00ffff] hover:text-[#ff55ff] text-[26px] cursor-pointer transition duration-300"
+        onClick={() => navigate("/loops")}
+        title="Reels"
+      >
+        <BsCameraReelsFill />
+      </div>
+
+      {/* Profile */}
       <div
-        className="w-[40px] h-[40px] border-[1.5px] border-gray-500 rounded-full cursor-pointer overflow-hidden"
+        className="w-[44px] h-[44px] border-2 border-blue-400 rounded-full cursor-pointer overflow-hidden
+        shadow-md shadow-blue-500/70 hover:scale-110 transition transform"
         onClick={() => userData?.userName && navigate(`/profile/${userData.userName}`)}
+        title="Profile"
       >
         <img
           src={userData?.profileImage || dp}

@@ -1,11 +1,10 @@
 import React, { useRef, useState } from "react";
 import { IoArrowBack } from "react-icons/io5";
-import { useSelector } from "react-redux";
+import { useSelector, useDispatch } from "react-redux";
 import { useNavigate } from "react-router-dom";
 import dp from "../assets/dp.png";
 import { serverUrl } from "../App";
 import axios from "axios";
-import { useDispatch } from "react-redux";
 import { setProfileData, setUserData } from "../redux/userSlice";
 import { ClipLoader } from "react-spinners";
 
@@ -13,9 +12,7 @@ function EditProfile() {
   const { userData } = useSelector((state) => state.user);
   const navigate = useNavigate();
   const imageInput = useRef();
-  const [frontendImage, setFrontendImage] = useState(
-    userData.profileImage || dp
-  );
+  const [frontendImage, setFrontendImage] = useState(userData.profileImage || dp);
   const [backendImage, setBackendImage] = useState(null);
   const [name, setName] = useState(userData.name || "");
   const [userName, setUserName] = useState(userData.userName || "");
@@ -23,7 +20,7 @@ function EditProfile() {
   const [profession, setProfession] = useState(userData.profession || "");
   const [gender, setGender] = useState(userData.gender || "");
   const dispatch = useDispatch();
-  const [loading,setLoading] = useState(false);
+  const [loading, setLoading] = useState(false);
 
   const handleImage = (e) => {
     const file = e.target.files[0];
@@ -40,15 +37,12 @@ function EditProfile() {
       fromdata.append("bio", bio);
       fromdata.append("profession", profession);
       fromdata.append("gender", gender);
-
       if (backendImage) {
         fromdata.append("profileImage", backendImage);
       }
-      const result = await axios.post(
-        `${serverUrl}/api/user/editprofile`,
-        fromdata,
-        { withCredentials: true }
-      );
+      const result = await axios.post(`${serverUrl}/api/user/editprofile`, fromdata, {
+        withCredentials: true,
+      });
       dispatch(setProfileData(result.data));
       dispatch(setUserData(result.data));
       navigate(`/profile/${userName}`);
@@ -58,104 +52,67 @@ function EditProfile() {
       setLoading(false);
     }
   };
+
   return (
-    <div className="w-full min-h-[100vh] bg-black flex flex-col items-center gap-[20px] ">
-      {/* back button */}
-      <div className="w-full h-[80px]  flex items-center gap-[20px] px-[20px]">
+    <div className="w-full min-h-[100vh] bg-[#0A0F1C] flex flex-col items-center gap-6 py-6">
+      {/* Back button */}
+      <div className="w-full flex items-center gap-4 px-6">
         <IoArrowBack
           size={30}
-          className="text-white cursor-pointer hover:text-gray-300 "
+          className="text-blue-400 cursor-pointer hover:text-blue-300 transition-colors"
           onClick={() => navigate(`/profile/${userData.userName}`)}
         />
-        <h1 className="text-white text-[20px] font-semibold">Edit Profile</h1>
+        <h1 className="text-blue-300 text-2xl font-semibold tracking-wide">
+          Edit Profile
+        </h1>
       </div>
 
-      {/* profile image  */}
+      {/* Profile image */}
       <div
-        className="w-[80px] h-[80px] md:w-[100px] md:h-[100px] border-4 border-white rounded-full cursor-pointer overflow-hidden shadow-md "
+        className="w-20 h-20 md:w-24 md:h-24 border-4 border-blue-500/50 rounded-full cursor-pointer overflow-hidden shadow-[0_0_15px_rgba(37,99,235,0.7)] hover:shadow-[0_0_25px_rgba(37,99,235,0.9)] transition-all"
         onClick={() => imageInput.current.click()}
       >
-        {/* image input */}
         <input
           type="file"
           accept="image/*"
           ref={imageInput}
           hidden
           onChange={handleImage}
-        ></input>
-        {/* profile image */}
-        <img
-          src={frontendImage}
-          alt="profile"
-          className="w-full h-full object-cover"
         />
+        <img src={frontendImage} alt="profile" className="w-full h-full object-cover" />
       </div>
 
-      {/* all inputs */}
       <div
-        className="text-blue-500 text-center text-lg opacity-100 cursor-pointer"
+        className="text-blue-400 text-center text-lg cursor-pointer hover:text-blue-300 transition-colors"
         onClick={() => imageInput.current.click()}
       >
         Change your profile picture
       </div>
 
-      {/* All input fields */}
-      <input
-        type="text"
-        value={name}
-        onChange={(e) => setName(e.target.value)}
-        className="w-[90%] max-w-[600px] h-[60px] 
-  bg-[#0a1010] border-2 border-gray-700 rounded-2xl text-white font-semibold px-[20px]
-  outline-none placeholder:text-gray-400"
-        placeholder="Enter your name"
-      />
+      {/* Input fields */}
+      {[
+        { value: name, setter: setName, placeholder: "Enter your name" },
+        { value: userName, setter: setUserName, placeholder: "Enter your username" },
+        { value: bio, setter: setBio, placeholder: "Bio" },
+        { value: profession, setter: setProfession, placeholder: "Profession" },
+        { value: gender, setter: setGender, placeholder: "Gender" },
+      ].map((field, idx) => (
+        <input
+          key={idx}
+          type="text"
+          value={field.value}
+          onChange={(e) => field.setter(e.target.value)}
+          placeholder={field.placeholder}
+          className="w-[90%] max-w-[600px] h-14 bg-[#0a1010] border-2 border-blue-500/50 rounded-2xl text-white font-semibold px-5 outline-none placeholder:text-blue-300 focus:border-blue-400 focus:shadow-[0_0_10px_rgba(37,99,235,0.7)] transition-all"
+        />
+      ))}
 
-      <input
-        type="text"
-        value={userName}
-        onChange={(e) => setUserName(e.target.value)}
-        className="w-[90%] max-w-[600px] h-[60px] 
-  bg-[#0a1010] border-2 border-gray-700 rounded-2xl text-white font-semibold px-[20px]
-  outline-none placeholder:text-gray-400"
-        placeholder="Enter your username"
-      />
-
-      <input
-        type="text"
-        value={bio}
-        onChange={(e) => setBio(e.target.value)}
-        className="w-[90%] max-w-[600px] h-[60px] 
-  bg-[#0a1010] border-2 border-gray-700 rounded-2xl text-white font-semibold px-[20px]
-  outline-none placeholder:text-gray-400"
-        placeholder="Bio"
-      />
-
-      <input
-        type="text"
-        value={profession}
-        onChange={(e) => setProfession(e.target.value)}
-        className="w-[90%] max-w-[600px] h-[60px] 
-  bg-[#0a1010] border-2 border-gray-700 rounded-2xl text-white font-semibold px-[20px]
-  outline-none placeholder:text-gray-400"
-        placeholder="Profession"
-      />
-
-      <input
-        type="text"
-        value={gender}
-        onChange={(e) => setGender(e.target.value)}
-        className="w-[90%] max-w-[600px] h-[60px] 
-  bg-[#0a1010] border-2 border-gray-700 rounded-2xl text-white font-semibold px-[20px]
-  outline-none placeholder:text-gray-400"
-        placeholder="Gender"
-      />
-
+      {/* Save button */}
       <button
-        className="px-[10px] w-[60%] max-w-[400px] py-[5px] h-[50px] bg-white 
-  cursor-pointer rounded-2xl font-semibold text-black"
-      onClick={handleEditProfile}      
+        onClick={handleEditProfile}
+        className="w-[60%] max-w-[400px] h-14 bg-blue-500 hover:bg-blue-600 text-white font-semibold rounded-2xl shadow-[0_0_15px_rgba(37,99,235,0.6)] hover:shadow-[0_0_25px_rgba(37,99,235,0.9)] transition-all flex items-center justify-center"
       >
-        {loading ? <ClipLoader size={30} color="black" /> : "Save Profile"}
+        {loading ? <ClipLoader size={28} color="white" /> : "Save Profile"}
       </button>
     </div>
   );
