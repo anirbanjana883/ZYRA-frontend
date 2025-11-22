@@ -1,5 +1,5 @@
 import React from "react";
-import logo from "../assets/ZYRA_logo.png";
+import logo from "../assets/ZYRA_LOGO.png";
 import tagLine from "../assets/tag_line.png";
 import dp from "../assets/dp.png";
 import { useDispatch, useSelector } from "react-redux";
