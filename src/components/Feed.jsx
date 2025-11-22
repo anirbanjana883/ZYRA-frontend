@@ -1,5 +1,5 @@
 import React from "react";
-import logo from "../assets/ZYRA_logo.png";
+import logo from "../assets/ZYRA_LOGO.png";
 import tagLine from "../assets/tag_line.png";
 import { FaRegHeart } from "react-icons/fa";
 import { TbMessage2 } from "react-icons/tb";
