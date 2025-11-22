@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import { IoArrowBack } from "react-icons/io5";
 import { useDispatch, useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
-import OnlineUser from "../components/onlineUser";
+import OnlineUser from "../components/OnlineUser";
 import { setSelectedUser } from "../redux/messageSlice";
 import dp from "../assets/dp.png";
 import { FiMessageSquare } from "react-icons/fi";
