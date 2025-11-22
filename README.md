@@ -1,176 +1,86 @@
-# 🌐 ZYRA — Social Media Platform (Frontend)
+# Zyra (Social Media Platform)
 
-ZYRA is a modern social media web application frontend built using **React**, **Vite**, and **Redux Toolkit**.  
-It provides a smooth, responsive user experience featuring posts, stories, messaging, notifications, and real-time interactions — similar to Instagram or X.
+![Zyra Logo](src/assets/ZYRA_LOGO.png)
 
----
-
-## 🚀 Features
-
-- 🔐 User Authentication (Sign Up / Sign In / Forgot Password)
-- 🏠 Dynamic Home Feed with Posts & Stories
-- 💬 Real-Time Chat with Socket.io
-- 🎥 Video and Image Upload Support
-- 🔔 Notifications & Follow System
-- 🧵 Loops (Thread-like Posts)
-- 🧑‍🎨 User Profiles and Editing
-- 🔍 Search for Users & Posts
-- 🌐 Fully Responsive Design
-- ⚡ Fast Development & Build with Vite
+A modern, feature-rich social media application built with React, Vite, and Redux Toolkit. Zyra is designed to be a complete social experience, incorporating features inspired by modern platforms like Instagram and Twitter.
 
 ---
 
-## 🧱 Folder Structure
+## 📸 Features
 
+Based on the project structure, Zyra includes the following features:
 
-ZYRA-frontend/
-├── public/                 # Static assets (favicon, icons)
-├── src/
-│   ├── assets/             # Logos, images, static files
-│   ├── components/         # Reusable UI components
-│   ├── hooks/              # Custom React hooks
-│   ├── pages/              # Main app pages
-│   ├── redux/              # Redux store and slices
-│   ├── App.jsx             # Root component
-│   ├── main.jsx            # Entry point
-│   ├── socket.js           # Socket.io setup
-│   ├── App.css / index.css # Stylesheets
-├── .gitignore
-├── package.json
-├── vite.config.js
-└── README.md
+* **🛡️ Authentication:** Secure user sign-up, sign-in, and forgot password functionality.
+* **👤 User Profiles:** View and edit user profiles, including profile pictures and user details.
+* **🚶‍♂️ Follow System:** Follow and unfollow other users, with suggestions for new users to follow.
+* **📰 Main Feed:** A central feed (`Feed.jsx`) to display posts (`Post.jsx`) from followed users.
+* **📱 Stories:** Instagram-like stories (`Story.jsx`, `StoryCard.jsx`) for temporary, 24-hour content.
+* **🎥 Loops:** A short-form video feature (`Loops.jsx`, `LoopCard.jsx`), similar to Reels or TikToks.
+* **💬 Real-time Messaging:** A complete chat system (`Messages.jsx`, `MessageArea.jsx`) with real-time updates using WebSockets (`socket.js`).
+* **🔔 Notifications:** Real-time notifications (`Notifications.jsx`) for likes, follows, and messages.
+* **🔍 Search:** Functionality to search for other users or content.
+* **⬆️ Upload:** A dedicated page (`Upload.jsx`) for users to create new posts, stories, or loops.
+* **🔄 Global State Management:** Uses **Redux Toolkit** (`src/redux`) to manage application-wide state for users, posts, messages, stories, loops, and socket connections.
+* **🎣 Custom Hooks:** Organized data-fetching logic into custom hooks (`src/hooks`) for clean and reusable code (e.g., `getAllPost.jsx`, `getCurrentUser.jsx`).
 
+---
 
-⚙️ Installation & Setup
+## 🛠️ Tech Stack
 
-1️⃣ Clone the Repository
-git clone https://github.com/anirbanjana883/ZYRA-frontend.git
-cd ZYRA-frontend
+* **Frontend:** **React.js**
+* **Build Tool:** **Vite**
+* **State Management:** **Redux Toolkit**
+* **Real-time:** **Socket.io-client**
+* **Styling:** **CSS** (as seen in `App.css`, `index.css`)
 
-2️⃣ Install Dependencies
-npm install
+---
 
-3️⃣ Create Environment Variables
+## 🚀 Getting Started
 
-In the project root, create a .env file:
+Follow these instructions to get a local copy up and running.
 
-VITE_BACKEND_URL=http://localhost:8000
+### Prerequisites
 
-4️⃣ Run the Development Server
-npm run dev
+* Node.js (v18 or newer)
+* npm (or yarn)
 
+### Installation
 
-App will run on: http://localhost:5173
+1.  **Clone the repository:**
+    ```sh
+    git clone [https://github.com/your-username/your-repo-name.git](https://github.com/your-username/your-repo-name.git)
+    ```
 
-5️⃣ Build for Production
-npm run build
+2.  **Navigate to the project directory:**
+    ```sh
+    cd your-repo-name
+    ```
 
-🧩 Tech Stack
+3.  **Install dependencies:**
+    ```sh
+    npm install
+    ```
 
-React (Vite)
+4.  **Set up environment variables:**
 
-Redux Toolkit
+    Create a file named `.env` in the root of your project and add the necessary environment variables. Vite requires a `VITE_` prefix for variables to be exposed to the frontend.
 
-Socket.io Client
+    ```.env
+    # Example: Your backend API server URL
+    VITE_BACKEND_URL=http://localhost:8000/api/v1
+    
+    # Example: Your Socket.io server URL
+    VITE_SOCKET_URL=http://localhost:8000
+    ```
 
-React Router DOM
+5.  **Run the development server:**
+    ```sh
+    npm run dev
+    ```
+    Your application should now be running on `http://localhost:5173` (or another port if 5173 is busy).
 
-Axios
+---
 
-Tailwind / CSS
+## 📂 Project Structure
 
-ESLint
-
-🧠 Redux Slices Overview
-
-userSlice.js → Handles authentication and user state
-
-postSlice.js → Manages posts
-
-storySlice.js → Handles stories
-
-loopSlice.js → Manages loop/thread posts
-
-messageSlice.js → Handles chats and messages
-
-socketSlice.js → Manages socket connection
-
-store.js → Configures Redux store
-
-🪝 Custom Hooks
-
-getCurrentUser.jsx → Fetch logged-in user data
-
-getAllPost.jsx → Fetch all posts
-
-getAllStories.jsx → Fetch stories
-
-getAllNotification.jsx → Fetch notifications
-
-getSuggestedUser.jsx → Suggest users to follow
-
-getFollowingList.jsx → Get following users
-
-getPrevChatUsers.jsx → Get previous chat sessions
-
-getAllLoops.jsx → Fetch loops
-
-🧩 Key Components
-
-Nav.jsx → Navigation bar
-
-Feed.jsx → Main feed view
-
-StoryCard.jsx / StoryDp.jsx → Stories UI
-
-VideoPlayer.jsx → Plays videos
-
-MessageArea.jsx → Chat UI
-
-NotificationCard.jsx → Renders notifications
-
-FollowButton.jsx → Follow / Unfollow functionality
-
-OtherUser.jsx → Displays other user profiles
-
-🔗 Backend Integration
-
-ZYRA Frontend connects with the ZYRA Backend, which manages:
-
-JWT Authentication
-
-Posts, Stories, and Loops
-
-Notifications
-
-Real-Time Messaging (Socket.io)
-
-MongoDB Database
-
-Ensure the backend server is running before starting the frontend.
-
-🧰 Available Scripts
-npm run dev       # Start local dev server
-npm run build     # Build app for production
-npm run preview   # Preview production build
-npm run lint      # Run ESLint checks
-
-🧑‍💻 Contributing
-
-Fork the repository
-
-Create a feature branch (feat/your-feature-name)
-
-Commit your changes
-
-Push and open a Pull Request
-
-🪪 License
-
-This project is licensed under the MIT License.
-You are free to use, modify, and distribute it with proper attribution.
-
-👤 Author
-
-Anirban Jana
-GitHub Profile
+The project follows a standard React application structure, organizing files by their feature or type.

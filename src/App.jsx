@@ -32,7 +32,8 @@ import { initSocket, getSocket, closeSocket } from "./socket";
 
 
 
-export const serverUrl = "http://localhost:8000";
+// export const serverUrl = "http://localhost:8000";
+export const serverUrl = "https://zyra-backend-f09v.onrender.com";
 
 function App() {
   const dispatch = useDispatch()
