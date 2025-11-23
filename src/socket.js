@@ -1,6 +1,6 @@
 import { io } from "socket.io-client";
 
-const URL = "http://localhost:8000"; // backend server
+const URL = "https://zyra-backend-f09v.onrender.com"; // backend server
 let socket;
 
 export const initSocket = (userId) => {
